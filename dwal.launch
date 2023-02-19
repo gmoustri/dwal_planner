@@ -1,0 +1,8 @@
+<launch>
+  <rosparam file="$(find dwal_planner)/dwal_params.yaml" command="load" ns="dwal_planner" /> 
+ 
+
+-->
+  <node name="generator" pkg="dwal_planner" type="generator" output="screen" ns="dwal_planner" />
+  <node name="clustering" pkg="dwal_planner" type="clustering" output="screen" ns="dwal_planner" />
+</launch>

@@ -1,0 +1,70 @@
+odometryTopic: /odom
+leg_laser_scanner: { topic: /rear_scan, frame: rear_laser }
+
+/following/distance_threshold : 7.0 
+/following/time_threshold : 60.0
+/following/start_condition : True
+ff_generator/ff_cmap:
+  footprint: [[-0.1,-0.3], [-0.1,0.3], [0.8,0.3], [0.8,-0.3]]
+  global_frame: odom
+  robot_base_frame: base_link
+  rolling_window: true
+  update_frequency: 5.0
+  publish_frequency: 2.0
+  transform_tolerance : 0.4
+  width: 9.0
+  height: 9.0
+  max_obstacle_height: 1.5
+  obstacle_range: 4
+  raytrace_range: 4.5
+  resolution: 0.1
+  inflation_radius: 0.1
+  plugins: 
+    - {name: obstacles, type: "costmap_2d::VoxelLayer"}
+    - {name: inflation, type: "costmap_2d::InflationLayer"}
+  obstacles:
+    observation_sources: laser_scanner_front
+    laser_scanner_front: {data_type: LaserScan, topic: /front_scan, sensor_frame: front_laser, marking: true, clearing: true,  observation_persistence: 0.5}
+
+ff_generator:
+  max_vel_trans: 0.3
+  min_vel_trans: 0.1
+  max_vel_theta: 1.0
+  acc_lim_th: 3.2
+  acc_lim_x: 1.5
+  sim_period: 0.2
+  DS: 0.1
+  Kmax: 2.0
+  Hz: 10
+
+ff_clustering:
+  postfix: ['near','far']
+  levels: [1.5, 3.0]
+  spin: [0,1]
+  min_cluster_span: 0.2
+  cluster_separation: 5
+
+ff_human_input:
+  vmax: 0.25
+  vwalk: 0.2
+  x0: 1.0
+  xw2: 0.8
+  xw1: 0.4 
+  Bv: 0.1
+  Bw: 0.01
+  e: 0.05
+  y_max: 0.25
+
+ff_intent_observation:
+  score_threshold: 3.0
+  decay_duration: 1.0
+
+centroid:
+  Xmin: 0.1
+  Xmax: 1.2
+  Ymax: 0.4
+  HIZ_Xmin: 0.05
+  HIZ_Xmax: 1.2
+  HIZ_Ymax: 0.5
+  Lx: 0.2
+  Ly: 0.3
