@@ -8,7 +8,7 @@ The DWAL Planner is a ROS package for creating motion clusters while moving in a
 - a laserscan source
 - a working tf
 
-The **tf** should include the transformation of *base_link* to the *odom* frame, as well as the laser frame to the *base_link* frame.
+The **tf** should include the transformation of *base\_link* to the *odom* frame, as well as the laser frame to the *base\_link* frame.
 
     <table> 
     	<tr> 
