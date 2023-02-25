@@ -278,3 +278,4 @@ MIT
 [sensor_msgs/LaserScan]: http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/LaserScan.html
 [dwal_planner/Cluster_Group]: https://github.com/gmoustri/dwal_planner/blob/main/msg/Path_Cluster.msg
 [dwal_planner/Sampled_Cluster]: https://github.com/gmoustri/dwal_planner/blob/main/msg/Sampled_Cluster.msg
+[std_srvs/Empty]: http://docs.ros.org/en/noetic/api/std_srvs/html/srv/Empty.html
