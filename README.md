@@ -204,11 +204,11 @@ The costamp does not use an external map. Thus the *global\_frame* parameter **s
     
  * **`dwal_clustering\postfix`** (array of strings, default: ['near'])
 
-    appends each *string* of the array at the names of the clusters. Each level is published with this string as postfix. **Must have the same number of elements as the _levels_ parameters!**
+    appends each *string* of the array at the names of the clusters. Each level is published with this string as postfix. **Must have the same number of elements as the _levels_ parameter!**
     
  * **`dwal_clustering\spin`** (array of numbers, default: [1])
 
-    whether to start clustering each level, when the node starts. A value of "1" means to include the according level. "0" means to disregard it. **Must have the same number of elements as the _levels_ parameters!**
+    whether to start clustering each level, when the node starts. A value of "1" means to include the according level. "0" means to disregard it. **Must have the same number of elements as the _levels_ parameter!**
 
 Examples of the last three parameters are given below:
 
