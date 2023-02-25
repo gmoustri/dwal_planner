@@ -54,6 +54,63 @@ Just launch the dwal.launch file.
 ```sh
 roslaunch dwal_planner dwal.launch
 ```
+## Nodes
+### Node: dwal_generator
+
+This node received the laser scan and the odometric information, and produces the path bundle i.e. all the simulated paths up to their colission point. It creates the rolling costmap which follows the robot, marking obstacles along the way. The costmap only marks the space *ahead*.
+
+
+#### Subscribed Topics
+
+* **`/[odomTopic]`** ([nav_msgs/Odometry])
+
+    The odometry topic. This is defined by the */odometryTopic* parameters.
+
+* **`/[Laser Topic]`** ([sensor_msgs/LaserScan])
+
+    The topic of the lidar sensor facing forwards. This is used by the costmap and is defined in the corresponding costmap parameters (see [below](#costmap-parameters)).
+
+#### Published Topics
+
+* **`~/sampled_paths`** ([dwal_planner/Sampled_Cluster])
+
+    This topic contains the path bundle in the custom message type (see below for the custom messages)
+    
+* **`~/sampled_pathMarkers`** ([visualization_msgs/MarkerArray])
+
+    Rviz markers to visualize the computed path bundle.
+        
+    
+### Node: dwal_clustering
+
+This node receives the sampled path bundle from the *dwal_generator* node and performs clustering over the paths. It publishes the clusters to the appropriate topics.
+
+#### Subscribed Topics
+
+* **`~/sampled_paths`** ([nav_msgs/Odometry])
+
+    The path bundle as published by the *dwal_generator* node
+
+#### Published Topics
+
+* **`~/clusters_[postfix]`** ([dwal_planner/Cluster_Group])
+
+    This topic contains the path cluster of the specific level. Corresponds to one topic per level, as defined in the [Path Clustering Parameters]($path-clustering-parameters)
+    
+* **`~/sampled_pathMarkers`** ([visualization_msgs/MarkerArray])
+
+    Rviz markers to visualize the computed path bundle.
+    
+ #### Services
+
+* **`toggle_cluster_spin`** ([std_srvs/Empty])
+    
+    Activate/deactive each level for the computation of clusters. Service accepts and *int32[]* array of '0s' and '1s', setting and usetting each corresponding level. For example calling the service with [0,1,1] will deactive the first level in the clustering process, and allow the rest two (if there are three levels)
+    
+ * **`toggle_cluster_slice`** ([std_srvs/Empty])
+    
+    Perform directional slicing between source and target cluster groups.
+
 ## Parameters
 The parameters are broken into 3 groups; the first defines the rolling costamp; the second defines the generation of the paths and the third sets the clustering condition. These are located in the file **dwal_params.yaml** in the top folder.
 
@@ -216,4 +273,8 @@ MIT
 
 **Free Software, Hell Yeah!**
 
-
+[nav_msgs/odometry]: http://docs.ros.org/en/noetic/api/nav_msgs/html/msg/Odometry.html
+[visualization_msgs/MarkerArray]: http://docs.ros.org/en/noetic/api/visualization_msgs/html/msg/MarkerArray.html
+[sensor_msgs/LaserScan]: http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/LaserScan.html
+[dwal_planner/Cluster_Group]: https://github.com/gmoustri/dwal_planner/blob/main/msg/Path_Cluster.msg
+[dwal_planner/Sampled_Cluster]: https://github.com/gmoustri/dwal_planner/blob/main/msg/Sampled_Cluster.msg
