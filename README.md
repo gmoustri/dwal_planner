@@ -6,6 +6,9 @@ The DWAL Planner is a ROS package for creating motion clusters while moving in a
 - a robot
 - an odometry source
 - a laserscan source
+- a working tf
+
+The **tf** should include the transformation of *base_link* to the *odom* frame, as well as the laser frame to the *base_link* frame.
 
     <table> 
     	<tr> 
@@ -36,6 +39,13 @@ For more information see the papers below:
 
 Download the package into your ROS workspace and catkin_make it. This is a ROS 1 version (noetic build).
 
+## How to run
+
+Just launch the dwal.launch file.
+
+```sh
+roslaunch dwal_planner dwal.launch
+```
 
 ## License
 
