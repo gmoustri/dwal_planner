@@ -20,7 +20,7 @@ The **tf** should include the transformation of *base\_link* to the *odom* frame
 </table> 
 
 
-For more information see the papers below:
+For more technical information see the papers below:
 
 *Moustris, G.P., and C. S. Tzafestas. “**Intention-Based Front-Following Control for an Intelligent Robotic Rollator in Indoor Environments.**” In Computational Intelligence (SSCI), 2016 IEEE Symposium Series On, 1–7. IEEE, 2016.* <a href="https://www.researchgate.net/publication/311571550_Intention-Based_Front-Following_Control_for_an_Intelligent_Robotic_Rollator_in_Indoor_Environments"> (PDF in RG) </a>
 
@@ -64,7 +64,7 @@ This node received the laser scan and the odometric information, and produces th
 
 * **`/[odomTopic]`** ([nav_msgs/Odometry])
 
-    The odometry topic. This is defined by the */odometryTopic* parameters.
+    The odometry topic. This is defined by the */odometryTopic* parameter.
 
 * **`/[Laser Topic]`** ([sensor_msgs/LaserScan])
 
@@ -74,7 +74,7 @@ This node received the laser scan and the odometric information, and produces th
 
 * **`~/sampled_paths`** ([dwal_planner/Sampled_Cluster])
 
-    This topic contains the path bundle in the custom message type (see below for the custom messages)
+    This topic contains the path bundle in a custom message type.
     
 * **`~/sampled_pathMarkers`** ([visualization_msgs/MarkerArray])
 
@@ -105,14 +105,14 @@ This node receives the sampled path bundle from the *dwal_generator* node and pe
 
 * **`toggle_cluster_spin`** ([std_srvs/Empty])
     
-    Activate/deactive each level for the computation of clusters. Service accepts and *int32[]* array of '0s' and '1s', setting and usetting each corresponding level. For example calling the service with [0,1,1] will deactive the first level in the clustering process, and allow the rest two (if there are three levels)
+    Activate/deactive each level for the computation of clusters. Service accepts an *int32[]* array of '0s' and '1s', setting and usetting each corresponding level. For example calling the service with [0,1,1] will deactive the first level in the clustering process, and allow the rest two (if there are three levels)
     
  * **`toggle_cluster_slice`** ([std_srvs/Empty])
     
     Perform directional slicing between source and target cluster groups.
 
 ## Parameters
-The parameters are broken into 3 groups; the first defines the rolling costamp; the second defines the generation of the paths and the third sets the clustering condition. These are located in the file **dwal_params.yaml** in the top folder.
+The parameters are broken into 3 groups; the first defines the rolling costamp; the second defines the generation of the paths and the third sets the clustering conditions. These are located in the file **dwal_params.yaml** in the top folder.
 
 ### General Parameters
 
@@ -177,7 +177,7 @@ The costamp does not use an external map. Thus the *global\_frame* parameter **s
 
 * **`dwal_generator\DS`** (number, default: 0.1)
 
-    lenght step to sample a path i.e. each path point is produced every *DS* meters on the path
+    length step to sample a path i.e. each path point is produced every *DS* meters on the path
 
 * **`dwal_generator\Kmax`** (number, default: 2.0)
 
@@ -192,7 +192,7 @@ The costamp does not use an external map. Thus the *global\_frame* parameter **s
 
 * **`dwal_clustering\min_cluster_span`** (number, default: 0.2)
 
-    the minimum span a cluster should have (in meters). This is the chord connecting the first and last cluster paths on the level's circle. Essentially it       defines the minimum width of a cluster. If a cluster's width is below this number, **the cluster is discarded**.
+    the minimum span a cluster should have (in meters). This is the chord connecting the first and last cluster paths on the level's circle. Essentially it defines the minimum width of a cluster. If a cluster's width is below this number, **the cluster is discarded**.
     
  * **`dwal_clustering\cluster_separation`** (number, default: 5)
 
@@ -204,11 +204,11 @@ The costamp does not use an external map. Thus the *global\_frame* parameter **s
     
  * **`dwal_clustering\postfix`** (array of strings, default: ['near'])
 
-    appends the each *string* of the array at the names of the clusters. Each level is published with this string as postfix. **Must be have the same number     of elements as the _levels_ parameters!**
+    appends each *string* of the array at the names of the clusters. Each level is published with this string as postfix. **Must have the same number of elements as the _levels_ parameters!**
     
  * **`dwal_clustering\spin`** (array of numbers, default: [1])
 
-    whether to start clustering each level, when the node starts. A value of "1" means to include the according level. "0" means to disregard it. **Must be       have the same number of elements as the _levels_ parameters!**
+    whether to start clustering each level, when the node starts. A value of "1" means to include the according level. "0" means to disregard it. **Must have the same number of elements as the _levels_ parameters!**
 
 Examples of the last three parameters are given below:
 
@@ -268,10 +268,8 @@ If you like this work and use it in your own, please cite the following publicat
 
 
 ## License
+Use it freely and for free. Comes with absolutely no warranty whatsoever! Just cite us if you incorporate it in your own work.
 
-MIT
-
-**Free Software, Hell Yeah!**
 
 [nav_msgs/odometry]: http://docs.ros.org/en/noetic/api/nav_msgs/html/msg/Odometry.html
 [visualization_msgs/MarkerArray]: http://docs.ros.org/en/noetic/api/visualization_msgs/html/msg/MarkerArray.html
