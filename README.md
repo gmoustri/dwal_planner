@@ -125,7 +125,7 @@ The parameters are broken into 3 groups; the first defines the rolling costamp; 
 
 Parameters for the rolling costmap. See <a href="http://wiki.ros.org/costmap_2d#costmap_2d.2Flayered.Parameters">here</a> for details. An example is given below:
    
- ```yaml
+```yaml
 dwal_generator/dwal_cmap:
   footprint: [[-0.1,-0.3], [-0.1,0.3], [0.8,0.3], [0.8,-0.3]]
   global_frame: odom
@@ -218,21 +218,21 @@ dwal_clustering:
   levels: [2.0]
   postfix: ['near']
   spin: [1]
-  ```
+```
 > Two clusters named 'near' and 'far' with Radii 2m and 3m
 ```yaml
 dwal_clustering:
   levels: [2.0, 3.0]
   postfix: ['near', 'far']
   spin: [1, 1]
-  ```
+```
  > Three clusters named 'near', 'far' and 'away' with Radii 1m, 2m and 3m
 ```yaml
 dwal_clustering:
   levels: [1.0, 2.0, 3.0]
   postfix: ['near', 'far', 'away']
   spin: [1, 1, 1]
-  ```
+```
 ![levels examples](./assets/levels.png)
 
 ## Citations
