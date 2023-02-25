@@ -1,17 +1,17 @@
-#include <front_following/libff_cluster.h>
+#include <dwal_planner/libdwal_cluster.h>
 #include <ros/ros.h>
 #include <ros/package.h>
 #include "std_msgs/String.h"
 #include "tf/tf.h"
 #include <tf/transform_listener.h>
-#include <front_following/Cluster_Group.h>
-#include <front_following/Sampled_Cluster.h>
+#include <dwal_planner/Cluster_Group.h>
+#include <dwal_planner/Sampled_Cluster.h>
 #include <math.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <string>
 #include <std_msgs/Int32MultiArray.h>
-#include "front_following/toggleClusters.h"
-#include "front_following/toggleSlice.h"
+#include "dwal_planner/toggleClusters.h"
+#include "dwal_planner/toggleSlice.h"
 
 double colors[] = {1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0.5, 0.5, 0.2, 0.8, 0.1, 0.4};
 
@@ -41,11 +41,11 @@ public:
   std::map<uint, uint> corresp_matrix;
   std::vector<std::vector<double> > phi_distances;
   int marker_num, cluster_separation, cluster_num, path_num, prev_cluster_num, level_index, Dind;
-  front_following::Cluster_Group group;
-  front_following::Path_Cluster tmp_cluster;
-  front_following::Path tmp_path;
+  dwal_planner::Cluster_Group group;
+  dwal_planner::Path_Cluster tmp_cluster;
+  dwal_planner::Path tmp_path;
   bool do_slice, direction;
-  front_following::Cluster_Group* source_slice_group_ptr;
+  dwal_planner::Cluster_Group* source_slice_group_ptr;
   int source_slice_cluster_id;
   int source_slice_cluster_index;
   double min_curv_slice, max_curv_slice;
@@ -57,16 +57,16 @@ public:
     source_slice_cluster_index = 1;
     sliced_path_indexes.clear();
     do_slice = direction = false;
-    nh.param("ff_clustering/min_cluster_span", min_cluster_span, 0.5);
-    nh.param("ff_clustering/cluster_separation", cluster_separation, 5);
+    nh.param("dwal_clustering/min_cluster_span", min_cluster_span, 0.5);
+    nh.param("dwal_clustering/cluster_separation", cluster_separation, 5);
 
-    while (!nh.getParam("ff_clustering/Marker_num", marker_num))
+    while (!nh.getParam("dwal_clustering/Marker_num", marker_num))
     {
     }; //wait until marker num becomes available
 
     path_marker.header.frame_id = "odom";
     path_marker.header.stamp = ros::Time::now();
-    path_marker.ns = "following";
+    path_marker.ns = "dwal_planner";
     path_marker.id = 0;
     path_marker.type = visualization_msgs::Marker::LINE_STRIP;
     path_marker.action = visualization_msgs::Marker::ADD;
@@ -86,7 +86,7 @@ public:
     }
   }
 
-  int clusterIdtoIndex(const int& id, const front_following::Cluster_Group* cl_group)
+  int clusterIdtoIndex(const int& id, const dwal_planner::Cluster_Group* cl_group)
   {
     for (int k = 0; k < (int)cl_group->clusters.size(); k++)
       if (cl_group->clusters[k].id == id)
@@ -191,7 +191,7 @@ public:
       prev_ids.push_back(group.clusters[i].id);
   }
 
-  void doClustering(const front_following::Sampled_Cluster::ConstPtr& msg)
+  void doClustering(const dwal_planner::Sampled_Cluster::ConstPtr& msg)
   {
     //msg contains all sampled paths, for the given level, up to their collision point (if one exists)
     cluster_num = 0;
@@ -294,7 +294,7 @@ public:
         j = 0;
         if (*spin != 0)
         {
-          for (front_following::Pose2D_32 const &p : msg->paths[l].poses)
+          for (dwal_planner::Pose2D_32 const &p : msg->paths[l].poses)
           {
             p0.x = p.x;
             p0.y = p.y;
@@ -350,7 +350,7 @@ public:
   std::vector<double> levels;
   std::string markerTopic, clusterTopic;
 
-  bool spinSrvHandler(front_following::toggleClusters::Request & req, front_following::toggleClusters::Response & res)
+  bool spinSrvHandler(dwal_planner::toggleClusters::Request & req, dwal_planner::toggleClusters::Response & res)
   {
     for (unsigned int k = 0; k < req.flags.size(); k++)
       spin[k] = req.flags[k];
@@ -358,7 +358,7 @@ public:
     return true;
   }
 
-  bool sliceSrvHandler(front_following::toggleSlice::Request & req, front_following::toggleSlice::Response & res)
+  bool sliceSrvHandler(dwal_planner::toggleSlice::Request & req, dwal_planner::toggleSlice::Response & res)
   {
     clustering_order.clear();
     clustering_order.push_back(req.source_group_index);
@@ -386,7 +386,7 @@ public:
     return true;
   }
 
-  void sampledClusterHandler(const front_following::Sampled_Cluster::ConstPtr& msg)
+  void sampledClusterHandler(const dwal_planner::Sampled_Cluster::ConstPtr& msg)
   {
     if (do_slice)
     {
@@ -419,10 +419,10 @@ public:
   {
     markerTopic = "cluster_markers_";
     clusterTopic = "clusters_";
-    nh.getParam("ff_clustering/postfix", postfixes);
-    nh.getParam("ff_clustering/levels", levels);
-    nh.param("ff_generator/Hz", Hz, 5.0);
-    nh.getParam("ff_clustering/spin", spin);
+    nh.getParam("dwal_clustering/postfix", postfixes);
+    nh.getParam("dwal_clustering/levels", levels);
+    nh.param("dwal_generator/Hz", Hz, 5.0);
+    nh.getParam("dwal_clustering/spin", spin);
 
     group_num = postfixes.size();
     if (group_num != levels.size())
@@ -437,7 +437,7 @@ public:
     group_objects.resize(group_num);
     toggleSpinService = nh.advertiseService("toggle_cluster_spin", &ControlClass::spinSrvHandler, this);
     toggleSliceService = nh.advertiseService("toggle_cluster_slice", &ControlClass::sliceSrvHandler, this);
-    sampled_cluster_subscriber = nh.subscribe<front_following::Sampled_Cluster>("sampled_paths", 1,
+    sampled_cluster_subscriber = nh.subscribe<dwal_planner::Sampled_Cluster>("sampled_paths", 1,
                                                                           &ControlClass::sampledClusterHandler, this);
 
     for (unsigned int k = 0; k < group_num; k++)
@@ -450,7 +450,7 @@ public:
       group_objects[k].markers_publisher = group_objects[k].nh.advertise<visualization_msgs::MarkerArray>(
           markerTopic + postfixes[k], 2);
 
-      group_objects[k].group_publisher = group_objects[k].nh.advertise<front_following::Cluster_Group>(
+      group_objects[k].group_publisher = group_objects[k].nh.advertise<dwal_planner::Cluster_Group>(
           clusterTopic + postfixes[k], 2);
     }
   }
@@ -458,7 +458,7 @@ public:
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "ff_clustering");
+  ros::init(argc, argv, "dwal_clustering");
 
   ControlClass ctrlObj;
   ros::Rate r(ctrlObj.Hz);

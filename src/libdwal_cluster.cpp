@@ -1,7 +1,7 @@
 /*********************************************************************
  Mod of simple_trajectory_generator. Uses only DWA and exposes input space samples
  *********************************************************************/
-#include <front_following/libff_cluster.h>
+#include <dwal_planner/libdwal_cluster.h>
 #include <ros/ros.h>
 #include <cmath>
 #include <math.h>
@@ -174,12 +174,11 @@ int SimpleTrajectoryGenerator::initialise(const std::vector<double> &pos, const 
 /**
  * Create and return the next sample trajectory
  */
-int SimpleTrajectoryGenerator::getTrajectories(std::vector<front_following::Sampled_Path> &trajs,
+int SimpleTrajectoryGenerator::getTrajectories(std::vector<dwal_planner::Sampled_Path> &trajs,
                                                costmap_2d::Costmap2DROS *costmap)
 {
   int result = 0;
   //update costmap just before checking trajectories
-  //costmap->getCostmapCopy(cmap);
   cmap = costmap->getCostmap();
   //loop over trajectories and sample them
   for (int k = 0; k < Curv_num_; k++)
@@ -190,7 +189,7 @@ int SimpleTrajectoryGenerator::getTrajectories(std::vector<front_following::Samp
   return result;
 }
 
-int SimpleTrajectoryGenerator::generateTrajectory(double sample_curv, front_following::Sampled_Path &traj,
+int SimpleTrajectoryGenerator::generateTrajectory(double sample_curv, dwal_planner::Sampled_Path &traj,
                                                   costmap_2d::Costmap2DROS *costmap)
 {
 
@@ -206,7 +205,7 @@ int SimpleTrajectoryGenerator::generateTrajectory(double sample_curv, front_foll
   int cellCost;
   bool stop = false;
   bool jumped = false;
-  front_following::Pose2D_32 pose;
+  dwal_planner::Pose2D_32 pose;
 
   A = 2 / sample_curv;
   dphi = sample_curv * DS_ / 2;
@@ -280,7 +279,7 @@ int SimpleTrajectoryGenerator::generateTrajectory(double sample_curv, front_foll
   return 1; //trajectory does not collide.
 }
 
-int SimpleTrajectoryGenerator::getTrajectories2(std::vector<front_following::Sampled_Path> &trajs,
+int SimpleTrajectoryGenerator::getTrajectories2(std::vector<dwal_planner::Sampled_Path> &trajs,
                                                 costmap_2d::Costmap2DROS *costmap,
                                                 base_local_planner::CostmapModel *cmap_model)
 {
@@ -296,7 +295,7 @@ int SimpleTrajectoryGenerator::getTrajectories2(std::vector<front_following::Sam
   return result;
 }
 
-int SimpleTrajectoryGenerator::generateTrajectory2(double sample_curv, front_following::Sampled_Path &traj,
+int SimpleTrajectoryGenerator::generateTrajectory2(double sample_curv, dwal_planner::Sampled_Path &traj,
                                                    costmap_2d::Costmap2DROS *costmap,
                                                    base_local_planner::CostmapModel *cmap_model)
 {
@@ -313,7 +312,7 @@ int SimpleTrajectoryGenerator::generateTrajectory2(double sample_curv, front_fol
   int footprintCost;
   bool stop = false;
   bool jumped = false;
-  front_following::Pose2D_32 pose;
+  dwal_planner::Pose2D_32 pose;
 
   A = 2 / sample_curv;
   dphi = sample_curv * DS_ / 2;

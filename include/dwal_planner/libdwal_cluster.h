@@ -5,14 +5,14 @@
  *      Author: george
  */
 
-#ifndef FF_CLUSTER_LIB_H_
-#define FF_CLUSTER_LIB_H_
+#ifndef DWAL_CLUSTER_LIB_H_
+#define DWAL_CLUSTER_LIB_H_
 
 #include <base_local_planner/local_planner_limits.h>
 #include <base_local_planner/costmap_model.h>
 #include <costmap_2d/costmap_2d_ros.h>
 #include <eigen3/Eigen/Core>
-#include <front_following/Sampled_Path.h>
+#include <dwal_planner/Sampled_Path.h>
 #include <nav_msgs/Path.h>
 #include "tf/tf.h"
 #include <tf/transform_datatypes.h>
@@ -58,12 +58,12 @@ public:
   /**
    * Whether this generator can create more trajectories
    */
-  int getTrajectories(std::vector<front_following::Sampled_Path> &path, costmap_2d::Costmap2DROS *costmap);
-  int generateTrajectory(double sample_curv, front_following::Sampled_Path &path, costmap_2d::Costmap2DROS *costmap);
+  int getTrajectories(std::vector<dwal_planner::Sampled_Path> &path, costmap_2d::Costmap2DROS *costmap);
+  int generateTrajectory(double sample_curv, dwal_planner::Sampled_Path &path, costmap_2d::Costmap2DROS *costmap);
 
-  int getTrajectories2(std::vector<front_following::Sampled_Path> &path, costmap_2d::Costmap2DROS *costmap,
+  int getTrajectories2(std::vector<dwal_planner::Sampled_Path> &path, costmap_2d::Costmap2DROS *costmap,
                        base_local_planner::CostmapModel *cmap_model);
-  int generateTrajectory2(double sample_curv, front_following::Sampled_Path &path, costmap_2d::Costmap2DROS *costmap,
+  int generateTrajectory2(double sample_curv, dwal_planner::Sampled_Path &path, costmap_2d::Costmap2DROS *costmap,
                           base_local_planner::CostmapModel *cmap_model);
 
 protected:

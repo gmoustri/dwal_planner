@@ -1,4 +1,4 @@
-#include <front_following/libff_cluster.h>
+#include <dwal_planner/libdwal_cluster.h>
 #include <ros/ros.h>
 #include <ros/package.h>
 #include "std_msgs/String.h"
@@ -6,7 +6,7 @@
 #include <tf/transform_listener.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
-#include <front_following/Sampled_Cluster.h>
+#include <dwal_planner/Sampled_Cluster.h>
 #include <math.h>
 #include "nav_msgs/Odometry.h"
 #include <visualization_msgs/MarkerArray.h>
@@ -34,9 +34,9 @@ public:
 
   cluster_lib::SimpleTrajectoryGenerator tp;
   base_local_planner::LocalPlannerLimits alims;
-  std::vector<front_following::Sampled_Path> paths;
+  std::vector<dwal_planner::Sampled_Path> paths;
   int marker_num, path_num;
-  front_following::Sampled_Cluster cluster;
+  dwal_planner::Sampled_Cluster cluster;
 
   TrajectoryGenerator();
 
@@ -72,7 +72,7 @@ public:
       cluster_markers.markers[k].points.clear(); //clear all path markers
     for (unsigned int l = 0; l < path_num; l++)
     {
-      for (front_following::Pose2D_32 const &p : cluster.paths[l].poses)
+      for (dwal_planner::Pose2D_32 const &p : cluster.paths[l].poses)
       {
         p0.x = p.x;
         p0.y = p.y;
@@ -100,26 +100,27 @@ TrajectoryGenerator::TrajectoryGenerator() // @suppress("Class members should be
    ros::Duration(1.0).sleep();
  }
 
-  costmap = new costmap_2d::Costmap2DROS("ff_cmap", *tfBuff);
+  costmap = new costmap_2d::Costmap2DROS("dwal_cmap", *tfBuff);
   cmap_model= new base_local_planner::CostmapModel(*(costmap->getCostmap()));
+  std::cout<<"ff\n";
 
   pos.resize(3);
   vel.resize(2);
   alims.acc_lim_y = 0;
 
-  nh.param("ff_generator/acc_lim_x", alims.acc_lim_x, 0.5);
-  nh.param("ff_generator/acc_lim_th", alims.acc_lim_theta, 0.5);
+  nh.param("dwal_generator/acc_lim_x", alims.acc_lim_x, 0.5);
+  nh.param("dwal_generator/acc_lim_th", alims.acc_lim_theta, 0.5);
 
-  nh.param("ff_generator/max_trans_vel", alims.max_vel_trans, 0.5);
-  nh.param("ff_generator/min_trans_vel", alims.min_vel_trans, 0.1);
-  nh.param("ff_generator/max_vel_theta", alims.max_vel_theta, 1.0);
+  nh.param("dwal_generator/max_trans_vel", alims.max_vel_trans, 0.5);
+  nh.param("dwal_generator/min_trans_vel", alims.min_vel_trans, 0.1);
+  nh.param("dwal_generator/max_vel_theta", alims.max_vel_theta, 1.0);
 
-  nh.param("ff_generator/sim_period", sim_period, 0.2);
-  nh.param("ff_generator/DS", DS, 0.1);
-  nh.param("ff_generator/ff_cmap/resolution", alpha, 0.2);
-  nh.param("ff_generator/Kmax", kmax, 2.0);
-  nh.param("ff_generator/Hz", Hz, 5.0);
-  nh.getParam("ff_clustering/levels", levels);
+  nh.param("dwal_generator/sim_period", sim_period, 0.2);
+  nh.param("dwal_generator/DS", DS, 0.1);
+  nh.param("dwal_generator/ff_cmap/resolution", alpha, 0.2);
+  nh.param("dwal_generator/Kmax", kmax, 2.0);
+  nh.param("dwal_generator/Hz", Hz, 5.0);
+  nh.getParam("dwal_clustering/levels", levels);
 
   nh.getParam("odometryTopic", odom_Topic);
 
@@ -141,9 +142,9 @@ TrajectoryGenerator::TrajectoryGenerator() // @suppress("Class members should be
   marker_num = (int)2 * fabs(phi0) / Dphi + 1; //maximum number of paths--remains fixed
   ROS_INFO("----marker_num=  %d", marker_num);
 
-  nh.setParam("ff_clustering/Marker_num", marker_num); //set marker_num to param server
+  nh.setParam("dwal_clustering/Marker_num", marker_num); //set marker_num to param server
 
-  front_following::Sampled_Path path;
+  dwal_planner::Sampled_Path path;
   for (int k = 0; k < marker_num; k++)
     paths.push_back(path);
 
@@ -155,7 +156,7 @@ TrajectoryGenerator::TrajectoryGenerator() // @suppress("Class members should be
 
   path_marker.header.frame_id = "odom";
   path_marker.header.stamp = ros::Time::now();
-  path_marker.ns = "following";
+  path_marker.ns = "dwal_planner";
   path_marker.id = 0;
   path_marker.type = visualization_msgs::Marker::LINE_STRIP;
   path_marker.action = visualization_msgs::Marker::ADD;
@@ -179,11 +180,11 @@ TrajectoryGenerator::TrajectoryGenerator() // @suppress("Class members should be
 int main(int argc, char **argv)
 {
 
-  ros::init(argc, argv, "ff_following");
+  ros::init(argc, argv, "dwal_generator");
 
   TrajectoryGenerator o;
   o.odom_subscriber = o.nh.subscribe<nav_msgs::Odometry>(o.odom_Topic, 1, &TrajectoryGenerator::odomHandler, &o);
-  o.sampledCl_publisher = o.nh.advertise<front_following::Sampled_Cluster>("sampled_paths", 2);
+  o.sampledCl_publisher = o.nh.advertise<dwal_planner::Sampled_Cluster>("sampled_paths", 2);
   o.sampledCl_markers_publisher = o.nh.advertise<visualization_msgs::MarkerArray>("sampled_pathMarkers", 2);
 
   ros::Rate r(o.Hz);

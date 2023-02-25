@@ -8,10 +8,10 @@
 #include <vector>
 #include <math.h>
 #include <algorithm>
-#include <front_following/Cluster_Group.h>
+#include <dwal_planner/Cluster_Group.h>
 
-#ifndef FF_CLUSTER_PROCESSING_H_
-#define FF_CLUSTER_PROCESSING_H_
+#ifndef DWAL_CLUSTER_PROCESSING_H_
+#define DWAL_CLUSTER_PROCESSING_H_
 
 class ProcessedCluster{
 public:
@@ -34,7 +34,7 @@ public:
 	int subCls_start_Index,subCls_end_index;
 
 	ProcessedGroup();
-	void processGroup(const front_following::Cluster_Group::ConstPtr& msg);
+	void processGroup(const dwal_planner::Cluster_Group::ConstPtr& msg);
 	ProcessedCluster* getClusterById(const int& id);
 	ProcessedCluster* getClusterById(const int& id) const;
 	double getGroupMaxBound();
@@ -43,4 +43,4 @@ public:
 
 
 
-#endif /* FF_CLUSTER_PROCESSING_H_ */
+#endif /* DWAL_CLUSTER_PROCESSING_H_ */
