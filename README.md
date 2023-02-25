@@ -7,7 +7,7 @@ The DWAL Planner is a ROS package for creating motion clusters while moving in a
 - an odometry source
 - a laserscan source
 
-    <table> 
+    <table width: 100%;> 
     	<tr> 
     		<td><img src="./assets/v1.gif" width="500"></td> 
     		<td><img src="./assets/v2.gif" width="500"></td> 
