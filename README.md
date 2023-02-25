@@ -9,8 +9,8 @@ The DWAL Planner is a ROS package for creating motion clusters while moving in a
 
     <table> 
     	<tr> 
-    		<td><img src="./assets/v1.gif" width="400"></td> 
-    		<td><img src="./assets/v2.gif" width="400"></td> 
+    		<td><img src="./assets/v1.gif" width="450"></td> 
+    		<td><img src="./assets/v2.gif" width="450"></td> 
     	</tr> 
     </table> 
 
