@@ -14,8 +14,8 @@ The **tf** should include the transformation of *base\_link* to the *odom* frame
 
 <table> 
     <tr> 
-        <td><img src="./assets/v1.gif" height="300"></td> 
-        <td><img src="./assets/v2.gif" height="300"></td> 
+        <td><img src="./assets/v1.gif" width="50%"></td> 
+        <td><img src="./assets/v2.gif" width="50%"></td> 
     </tr> 
 </table> 
 
