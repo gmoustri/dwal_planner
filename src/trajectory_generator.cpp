@@ -117,7 +117,7 @@ TrajectoryGenerator::TrajectoryGenerator() // @suppress("Class members should be
 
   nh.param("dwal_generator/sim_period", sim_period, 0.2);
   nh.param("dwal_generator/DS", DS, 0.1);
-  nh.param("dwal_generator/ff_cmap/resolution", alpha, 0.2);
+  nh.param("dwal_generator/dwal_cmap/resolution", alpha, 0.2);
   nh.param("dwal_generator/Kmax", kmax, 2.0);
   nh.param("dwal_generator/Hz", Hz, 5.0);
   nh.getParam("dwal_clustering/levels", levels);
