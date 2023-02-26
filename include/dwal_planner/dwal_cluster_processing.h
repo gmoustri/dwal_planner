@@ -1,9 +1,3 @@
-/*
- * ff_cluster_processing.h
- *
- *  Created on: Nov 20, 2015
- *      Author: root
- */
 #include <ros/ros.h>
 #include <vector>
 #include <math.h>
