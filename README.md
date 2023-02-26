@@ -268,7 +268,7 @@ If you like this work and use it in your own, please cite the following publicat
 
 
 ## License
-Use it freely and for free. Comes with absolutely no warranty whatsoever! Just cite us if you incorporate it in your own work.
+BSD-3-Clause license 
 
 
 [nav_msgs/odometry]: http://docs.ros.org/en/noetic/api/nav_msgs/html/msg/Odometry.html
