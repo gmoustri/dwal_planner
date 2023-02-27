@@ -12,6 +12,9 @@ The DWAL Planner is a ROS package for creating motion clusters while moving in a
 
 The **tf** should include the transformation of *base\_link* to the *odom* frame, as well as the laser frame to the *base\_link* frame.
 
+**Author: George Moustris<br />
+Affiliation: [Intelligent Robotics & Automation Lab @ ECE/NTUA](https://www.robotics.ntua.gr/)<br />**
+
 <table> 
     <tr> 
         <td><img src="./assets/v1.gif" width="100 vw"></td> 
