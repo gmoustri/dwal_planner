@@ -100,7 +100,7 @@ This node receives the sampled path bundle from the *dwal_generator* node and pe
 
     This topic contains the path cluster of the specific level. Corresponds to one topic per level, as defined in the [Path Clustering Parameters](#path-clustering-parameters)
     
-* **`~/sampled_pathMarkers`** ([visualization_msgs/MarkerArray])
+* **`~/cluster_markers_[postfix]`** ([visualization_msgs/MarkerArray])
 
     Rviz markers to visualize the computed path bundle.
     
