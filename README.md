@@ -277,6 +277,6 @@ BSD-3-Clause license
 [nav_msgs/odometry]: http://docs.ros.org/en/noetic/api/nav_msgs/html/msg/Odometry.html
 [visualization_msgs/MarkerArray]: http://docs.ros.org/en/noetic/api/visualization_msgs/html/msg/MarkerArray.html
 [sensor_msgs/LaserScan]: http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/LaserScan.html
-[dwal_planner/Cluster_Group]: https://github.com/gmoustri/dwal_planner/blob/main/msg/Path_Cluster.msg
+[dwal_planner/Cluster_Group]: https://github.com/gmoustri/dwal_planner/blob/main/msg/Cluster_Group.msg
 [dwal_planner/Sampled_Cluster]: https://github.com/gmoustri/dwal_planner/blob/main/msg/Sampled_Cluster.msg
 [std_srvs/Empty]: http://docs.ros.org/en/noetic/api/std_srvs/html/srv/Empty.html
