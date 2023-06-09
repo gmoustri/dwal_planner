@@ -60,7 +60,7 @@ roslaunch dwal_planner dwal.launch
 ## Nodes
 ### Node: dwal_generator
 
-This node received the laser scan and the odometric information, and produces the path bundle i.e. all the simulated paths up to their colission point. It creates the rolling costmap which follows the robot, marking obstacles along the way. The costmap only marks the space *ahead*.
+This node receives the laser scan and the odometric information, and produces the path bundle i.e. all the simulated paths up to their colission point. It creates the rolling costmap which follows the robot, marking obstacles along the way. The costmap only marks the space *ahead*.
 
 
 #### Subscribed Topics
@@ -90,7 +90,7 @@ This node receives the sampled path bundle from the *dwal_generator* node and pe
 
 #### Subscribed Topics
 
-* **`~/sampled_paths`** ([nav_msgs/Odometry])
+* **`~/sampled_paths`** ([dwal_planner/Sampled_Cluster])
 
     The path bundle as published by the *dwal_generator* node
 
