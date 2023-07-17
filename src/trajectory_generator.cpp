@@ -39,6 +39,7 @@ public:
   dwal_planner::Sampled_Cluster cluster;
 
   TrajectoryGenerator();
+  ~TrajectoryGenerator();
 
   void odomHandler(const nav_msgs::Odometry::ConstPtr& msg)
   {
@@ -59,7 +60,8 @@ public:
     //populate cluster msg with thin paths
     cluster.paths.clear(); //clear cluster
     cluster.pose0.clear();
-    for (unsigned int k = 0; k < path_num; k++)
+
+    for (int k = 0; k < path_num; k++)
     {
       cluster.paths.push_back(paths[k]); //add path to current cluster
     }
@@ -70,7 +72,7 @@ public:
     //Populate markers
     for (int k = 0; k < marker_num; k++)
       cluster_markers.markers[k].points.clear(); //clear all path markers
-    for (unsigned int l = 0; l < path_num; l++)
+    for (int l = 0; l < path_num; l++)
     {
       for (dwal_planner::Pose2D_32 const &p : cluster.paths[l].poses)
       {
@@ -174,8 +176,17 @@ TrajectoryGenerator::TrajectoryGenerator() // @suppress("Class members should be
     path_marker.id = k;
     cluster_markers.markers.push_back(path_marker);
   }
-
 }
+
+
+TrajectoryGenerator::~TrajectoryGenerator() {
+
+  delete cmap_model;
+  delete costmap;
+  delete tfl;
+  delete tfBuff;
+}
+
 
 int main(int argc, char **argv)
 {

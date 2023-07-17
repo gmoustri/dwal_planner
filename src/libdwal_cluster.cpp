@@ -299,7 +299,7 @@ int SimpleTrajectoryGenerator::generateTrajectory2(double sample_curv, dwal_plan
                                                    costmap_2d::Costmap2DROS *costmap,
                                                    base_local_planner::CostmapModel *cmap_model)
 {
-  // Generate trajectory using polygon footprint for colission detection
+  // Generate trajectory using polygon footprint for collision detection
   //trajectory might be reused so we'll make sure to reset it
   traj.poses.clear();
   traj.costs.clear(); //clear costs
