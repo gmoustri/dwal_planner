@@ -1,10 +1,3 @@
-/*
- * dwaMOD_trajectory_generator.h
- *
- *  Created on: Sep 2, 2015
- *      Author: george
- */
-
 #ifndef DWAL_CLUSTER_LIB_H_
 #define DWAL_CLUSTER_LIB_H_
 

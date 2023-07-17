@@ -113,9 +113,11 @@ include_directories(
 )
 
 ## Declare a C++ library
- add_library(cluster
+ add_library(dwal_cluster
    src/libdwal_cluster.cpp
  )
+ 
+ add_dependencies(dwal_cluster dwal_planner_generate_messages_cpp)
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
@@ -125,7 +127,7 @@ include_directories(
 add_executable(dwal_clustering src/clustering.cpp)
 add_executable(dwal_generator src/trajectory_generator.cpp)
 
-target_link_libraries(dwal_clustering cluster ${catkin_LIBRARIES})
-target_link_libraries(dwal_generator cluster ${catkin_LIBRARIES})
+target_link_libraries(dwal_clustering dwal_cluster ${catkin_LIBRARIES})
+target_link_libraries(dwal_generator dwal_cluster ${catkin_LIBRARIES})
 
 

@@ -12,6 +12,9 @@ The DWAL Planner is a ROS package for creating motion clusters while moving in a
 
 The **tf** should include the transformation of *base\_link* to the *odom* frame, as well as the laser frame to the *base\_link* frame.
 
+**Author: George Moustris<br />
+Affiliation: [Intelligent Robotics & Automation Lab @ ECE/NTUA](https://www.robotics.ntua.gr/)<br />**
+
 <table> 
     <tr> 
         <td><img src="./assets/v1.gif" width="100 vw"></td> 
@@ -57,7 +60,7 @@ roslaunch dwal_planner dwal.launch
 ## Nodes
 ### Node: dwal_generator
 
-This node received the laser scan and the odometric information, and produces the path bundle i.e. all the simulated paths up to their colission point. It creates the rolling costmap which follows the robot, marking obstacles along the way. The costmap only marks the space *ahead*.
+This node receives the laser scan and the odometric information, and produces the path bundle i.e. all the simulated paths up to their colission point. It creates the rolling costmap which follows the robot, marking obstacles along the way. The costmap only marks the space *ahead*.
 
 
 #### Subscribed Topics
@@ -87,7 +90,7 @@ This node receives the sampled path bundle from the *dwal_generator* node and pe
 
 #### Subscribed Topics
 
-* **`~/sampled_paths`** ([nav_msgs/Odometry])
+* **`~/sampled_paths`** ([dwal_planner/Sampled_Cluster])
 
     The path bundle as published by the *dwal_generator* node
 
@@ -97,7 +100,7 @@ This node receives the sampled path bundle from the *dwal_generator* node and pe
 
     This topic contains the path cluster of the specific level. Corresponds to one topic per level, as defined in the [Path Clustering Parameters](#path-clustering-parameters)
     
-* **`~/sampled_pathMarkers`** ([visualization_msgs/MarkerArray])
+* **`~/cluster_markers_[postfix]`** ([visualization_msgs/MarkerArray])
 
     Rviz markers to visualize the computed path bundle.
     
@@ -204,11 +207,11 @@ The costamp does not use an external map. Thus the *global\_frame* parameter **s
     
  * **`dwal_clustering\postfix`** (array of strings, default: ['near'])
 
-    appends each *string* of the array at the names of the clusters. Each level is published with this string as postfix. **Must have the same number of elements as the _levels_ parameters!**
+    appends each *string* of the array at the names of the clusters. Each level is published with this string as postfix. **Must have the same number of elements as the _levels_ parameter!**
     
  * **`dwal_clustering\spin`** (array of numbers, default: [1])
 
-    whether to start clustering each level, when the node starts. A value of "1" means to include the according level. "0" means to disregard it. **Must have the same number of elements as the _levels_ parameters!**
+    whether to start clustering each level, when the node starts. A value of "1" means to include the according level. "0" means to disregard it. **Must have the same number of elements as the _levels_ parameter!**
 
 Examples of the last three parameters are given below:
 
@@ -268,12 +271,12 @@ If you like this work and use it in your own, please cite the following publicat
 
 
 ## License
-Use it freely and for free. Comes with absolutely no warranty whatsoever! Just cite us if you incorporate it in your own work.
+BSD-3-Clause license 
 
 
 [nav_msgs/odometry]: http://docs.ros.org/en/noetic/api/nav_msgs/html/msg/Odometry.html
 [visualization_msgs/MarkerArray]: http://docs.ros.org/en/noetic/api/visualization_msgs/html/msg/MarkerArray.html
 [sensor_msgs/LaserScan]: http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/LaserScan.html
-[dwal_planner/Cluster_Group]: https://github.com/gmoustri/dwal_planner/blob/main/msg/Path_Cluster.msg
+[dwal_planner/Cluster_Group]: https://github.com/gmoustri/dwal_planner/blob/main/msg/Cluster_Group.msg
 [dwal_planner/Sampled_Cluster]: https://github.com/gmoustri/dwal_planner/blob/main/msg/Sampled_Cluster.msg
 [std_srvs/Empty]: http://docs.ros.org/en/noetic/api/std_srvs/html/srv/Empty.html
