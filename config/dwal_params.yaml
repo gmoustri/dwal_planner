@@ -1,0 +1,33 @@
+# Parameters for the dwal_clustering node
+"/dwal_planner/dwal_clustering":
+  ros__parameters:
+    "dwal_clustering/postfix": ['near']
+    "dwal_clustering/levels": [2.0]
+    "dwal_clustering/spin": [1]           
+    "dwal_clustering/min_cluster_span": 0.2
+    "dwal_clustering/cluster_separation": 5
+
+
+# Parameters for the dwal_generator node
+"/dwal_planner/dwal_generator":
+  ros__parameters:
+    odometryTopic: "/Odometry"  
+
+    occ_topic: "/move_base/local_costmap/costmap"
+    footprint: [0.362, 0.308, 0.362, -0.308, -0.362, -0.308, -0.362, 0.308]
+
+    "dwal_generator/acc_lim_x": 1.5
+    "dwal_generator/acc_lim_th": 3.2
+    "dwal_generator/max_trans_vel": 0.3
+    "dwal_generator/min_trans_vel": 0.1
+    "dwal_generator/max_vel_theta": 1.0
+
+    "dwal_generator/sim_period": 0.2
+    "dwal_generator/DS": 0.1
+    "dwal_generator/Kmax": 2.0
+    "dwal_generator/Hz": 30.0
+
+    "dwal_generator/dwal_cmap/resolution": 0.15
+
+    # duplicate of dwal_clustering param for convenience
+    "dwal_clustering/levels": [2.0]

@@ -1,154 +1,214 @@
 #include <dwal_planner/libdwal_cluster.h>
-#include <ros/ros.h>
-#include <ros/package.h>
-#include "std_msgs/String.h"
-#include "tf/tf.h"
-#include <tf/transform_listener.h>
+
+#include <memory>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <iostream>
+
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/qos.hpp>
+
+#include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
-#include <dwal_planner/Sampled_Cluster.h>
-#include <math.h>
-#include "nav_msgs/Odometry.h"
-#include <visualization_msgs/MarkerArray.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <tf2/utils.h>
+
+#include <nav_msgs/msg/odometry.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
+
+#include <dwal_planner/msg/sampled_cluster.hpp>
+#include <dwal_planner/msg/sampled_path.hpp>
+#include <dwal_planner/msg/pose2_d32.hpp>
 
 class TrajectoryGenerator
 {
 public:
-  ros::Subscriber odom_subscriber;
-  ros::Publisher sampledCl_publisher, sampledCl_markers_publisher;
-  ros::NodeHandle nh;
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_subscriber;
+  rclcpp::Publisher<dwal_planner::msg::SampledCluster>::SharedPtr sampledCl_publisher;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr sampledCl_markers_publisher;
+
+  std::shared_ptr<rclcpp::Node> node_;
   std::string odom_Topic;
 
-  //tf::TransformListener *tf;
-  tf2_ros::TransformListener *tfl;
-  tf2_ros::Buffer *tfBuff;
+  std::unique_ptr<tf2_ros::Buffer> tfBuff;
+  std::unique_ptr<tf2_ros::TransformListener> tfl;
   costmap_2d::Costmap2DROS *costmap;
   base_local_planner::CostmapModel *cmap_model;
 
-  visualization_msgs::Marker path_marker;
-  visualization_msgs::MarkerArray cluster_markers;
-  geometry_msgs::Point p0;
+  visualization_msgs::msg::Marker path_marker;
+  visualization_msgs::msg::MarkerArray cluster_markers;
+  geometry_msgs::msg::Point p0;
 
-  double sim_period, DS, alpha, kmax, Hz, Rmax, Dphi, phi0;
+  double sim_period{}, DS{}, alpha{}, kmax{}, Hz{}, Rmax{}, Dphi{}, phi0{};
   std::vector<double> pos, vel, levels;
 
   cluster_lib::SimpleTrajectoryGenerator tp;
   base_local_planner::LocalPlannerLimits alims;
-  std::vector<dwal_planner::Sampled_Path> paths;
-  int marker_num, path_num;
-  dwal_planner::Sampled_Cluster cluster;
+  std::vector<dwal_planner::msg::SampledPath> paths;
+  int marker_num{0}, path_num{0};
+  dwal_planner::msg::SampledCluster cluster;
 
-  TrajectoryGenerator();
+  explicit TrajectoryGenerator(const std::shared_ptr<rclcpp::Node>& node);
   ~TrajectoryGenerator();
 
-  void odomHandler(const nav_msgs::Odometry::ConstPtr& msg)
+  void odomHandler(const nav_msgs::msg::Odometry::SharedPtr msg)
   {
-    //copy odometry data
     pos[0] = msg->pose.pose.position.x;
     pos[1] = msg->pose.pose.position.y;
-    pos[2] = tf::getYaw(msg->pose.pose.orientation);
+    pos[2] = tf2::getYaw(msg->pose.pose.orientation);
 
     vel[0] = msg->twist.twist.linear.x;
     vel[1] = msg->twist.twist.angular.z;
 
     path_num = tp.initialise(pos, vel, Rmax);
 
-    ///tp.getTrajectories(paths, costmap);
+    if (!costmap || !costmap->getCostmap()) {
+      RCLCPP_WARN_THROTTLE(node_->get_logger(), *node_->get_clock(), 2000,
+                          "OccupancyGrid costmap not ready yet; skipping this cycle");
+      return;
+    }
+    // tp.getTrajectories(paths, costmap);
+    tp.getTrajectories2(paths, costmap, cmap_model);
 
-    tp.getTrajectories2(paths, costmap,cmap_model);
-
-    //populate cluster msg with thin paths
-    cluster.paths.clear(); //clear cluster
+    cluster.paths.clear();
     cluster.pose0.clear();
 
     for (int k = 0; k < path_num; k++)
-    {
-      cluster.paths.push_back(paths[k]); //add path to current cluster
-    }
+      cluster.paths.push_back(paths[static_cast<size_t>(k)]);
     cluster.pose0 = pos;
-    //publish cluster of generated paths
-    sampledCl_publisher.publish(cluster);
 
-    //Populate markers
+    sampledCl_publisher->publish(cluster);
+
     for (int k = 0; k < marker_num; k++)
-      cluster_markers.markers[k].points.clear(); //clear all path markers
+      cluster_markers.markers[static_cast<size_t>(k)].points.clear();
+
     for (int l = 0; l < path_num; l++)
     {
-      for (dwal_planner::Pose2D_32 const &p : cluster.paths[l].poses)
+      for (const dwal_planner::msg::Pose2D32 &p : cluster.paths[static_cast<size_t>(l)].poses)
       {
         p0.x = p.x;
         p0.y = p.y;
-        cluster_markers.markers[l].points.push_back(p0);
+        cluster_markers.markers[static_cast<size_t>(l)].points.push_back(p0);
       }
     }
-    sampledCl_markers_publisher.publish(cluster_markers);
+    sampledCl_markers_publisher->publish(cluster_markers);
   }
-
 };
 
-TrajectoryGenerator::TrajectoryGenerator() // @suppress("Class members should be properly initialized")
+TrajectoryGenerator::TrajectoryGenerator(const std::shared_ptr<rclcpp::Node>& node)
+: node_(node), costmap(nullptr), cmap_model(nullptr)
 {
+  tfBuff = std::make_unique<tf2_ros::Buffer>(node_->get_clock());
+  tfBuff->setUsingDedicatedThread(true);
+  tfl = std::make_unique<tf2_ros::TransformListener>(*tfBuff);
 
- tfBuff= new tf2_ros::Buffer(ros::Duration(10),true);
- tfBuff->setUsingDedicatedThread(true);
- tfl=new tf2_ros::TransformListener(*tfBuff);
+  std::string occ_topic_default = "/occupancy_map_local";
+  node_->declare_parameter<std::string>("occ_topic", occ_topic_default);
+  std::string occ_topic = occ_topic_default;
+  node_->get_parameter("occ_topic", occ_topic);
 
- /* Wait until the transform is available to be given to costmap */
- try{
-   tfBuff->lookupTransform("base_link", "odom",ros::Time(0),ros::Duration(3.0));
- }
- catch (tf2::TransformException &ex) {
-   ROS_WARN("%s",ex.what());
-   ros::Duration(1.0).sleep();
- }
+  node_->declare_parameter<std::vector<double>>("footprint", {});
+  std::vector<double> footprint_xy;
+  node_->get_parameter("footprint", footprint_xy);
 
-  costmap = new costmap_2d::Costmap2DROS("dwal_cmap", *tfBuff);
-  cmap_model= new base_local_planner::CostmapModel(*(costmap->getCostmap()));
-  std::cout<<"ff\n";
+  try {
+    tfBuff->lookupTransform("base_link", "map", tf2::TimePointZero, std::chrono::seconds(3));
+  } catch (const tf2::TransformException &ex) {
+    RCLCPP_WARN(node_->get_logger(), "%s", ex.what());
+    rclcpp::sleep_for(std::chrono::seconds(1));
+  }
+
+  costmap    = new costmap_2d::Costmap2DROS(node_, occ_topic);
+  auto cm = costmap->getCostmap();
+  while (rclcpp::ok() && (!cm || cm->getSizeInCellsX() == 0 || cm->getSizeInCellsY() == 0)) {
+    RCLCPP_INFO_THROTTLE(
+        node_->get_logger(), *node_->get_clock(), 2000,
+        "Waiting for OccupancyGrid on '%s' to populate...", occ_topic.c_str());
+    rclcpp::sleep_for(std::chrono::seconds(1));
+    rclcpp::spin_some(node_);
+    cm = costmap->getCostmap();
+  }
+  cmap_model = new base_local_planner::CostmapModel(costmap->getCostmap());
+
+  std::vector<geometry_msgs::msg::Point> fp;
+  if (footprint_xy.size() >= 6 && footprint_xy.size() % 2 == 0) {
+    fp.reserve(footprint_xy.size()/2);
+    for (size_t i = 0; i < footprint_xy.size(); i += 2) {
+      geometry_msgs::msg::Point p;
+      p.x = footprint_xy[i]; p.y = footprint_xy[i+1]; p.z = 0.0;
+      fp.push_back(p);
+    }
+  }
+  else {
+    RCLCPP_FATAL(node_->get_logger(),
+                "Footprint parameter malformed or too short; using default footprint");
+    throw(std::runtime_error("Footprint parameter malformed or too short"));
+  }
+  costmap->setRobotFootprint(fp);
 
   pos.resize(3);
   vel.resize(2);
-  alims.acc_lim_y = 0;
 
-  nh.param("dwal_generator/acc_lim_x", alims.acc_lim_x, 0.5);
-  nh.param("dwal_generator/acc_lim_th", alims.acc_lim_theta, 0.5);
+  node_->declare_parameter<double>("dwal_generator/acc_lim_x", 0.5);
+  node_->declare_parameter<double>("dwal_generator/acc_lim_th", 0.5);
 
-  nh.param("dwal_generator/max_trans_vel", alims.max_vel_trans, 0.5);
-  nh.param("dwal_generator/min_trans_vel", alims.min_vel_trans, 0.1);
-  nh.param("dwal_generator/max_vel_theta", alims.max_vel_theta, 1.0);
+  node_->declare_parameter<double>("dwal_generator/max_trans_vel", 0.5);
+  node_->declare_parameter<double>("dwal_generator/min_trans_vel", 0.1);
+  node_->declare_parameter<double>("dwal_generator/max_vel_theta", 1.0);
 
-  nh.param("dwal_generator/sim_period", sim_period, 0.2);
-  nh.param("dwal_generator/DS", DS, 0.1);
-  nh.param("dwal_generator/dwal_cmap/resolution", alpha, 0.2);
-  nh.param("dwal_generator/Kmax", kmax, 2.0);
-  nh.param("dwal_generator/Hz", Hz, 5.0);
-  nh.getParam("dwal_clustering/levels", levels);
+  node_->declare_parameter<double>("dwal_generator/sim_period", 0.2);
+  node_->declare_parameter<double>("dwal_generator/DS", 0.1);
+  node_->declare_parameter<double>("dwal_generator/dwal_cmap/resolution", 0.2);
+  node_->declare_parameter<double>("dwal_generator/Kmax", 2.0);
+  node_->declare_parameter<double>("dwal_generator/Hz", 5.0);
+  node_->declare_parameter<std::vector<double>>("dwal_clustering/levels", {});
+  node_->declare_parameter<std::string>("odometryTopic", "/odom");
 
-  nh.getParam("odometryTopic", odom_Topic);
+  double acc_lim_x{0.5}, acc_lim_th{0.5};
+  node_->get_parameter("dwal_generator/acc_lim_x",      acc_lim_x);
+  node_->get_parameter("dwal_generator/acc_lim_th",     acc_lim_th);
 
-  if (alims.min_vel_trans <= 0)
+  node_->get_parameter("dwal_generator/max_trans_vel",  alims.max_vel_trans);
+  node_->get_parameter("dwal_generator/min_trans_vel",  alims.min_vel_trans);
+  node_->get_parameter("dwal_generator/max_vel_theta",  alims.max_vel_theta);
+
+  node_->get_parameter("dwal_generator/sim_period", sim_period);
+  node_->get_parameter("dwal_generator/DS",         DS);
+  node_->get_parameter("dwal_generator/dwal_cmap/resolution", alpha);
+  node_->get_parameter("dwal_generator/Kmax",       kmax);
+  node_->get_parameter("dwal_generator/Hz",         Hz);
+  node_->get_parameter("dwal_clustering/levels",    levels);
+
+  node_->get_parameter("odometryTopic", odom_Topic);
+
+  alims.setAccLimits(static_cast<float>(acc_lim_x), 0.0f, static_cast<float>(acc_lim_th));
+
+  if (alims.min_vel_trans <= 0.0)
   {
-    ROS_INFO("---> min_vel_trans must be >0. Aborting...");
-    ros::shutdown();
+    RCLCPP_INFO(node_->get_logger(), "---> min_vel_trans must be >0. Aborting...");
+    rclcpp::shutdown();
     return;
   }
 
   Rmax = levels.back();
 
-  Dphi = 2 * asin(alpha / (2 * Rmax));
-  if (fabs(kmax) < (M_SQRT2 / Rmax))
-    phi0 = -fabs(asin(0.5 * Rmax * kmax));
+  Dphi = 2 * std::asin(alpha / (2 * Rmax));
+  if (std::fabs(kmax) < (M_SQRT2 / Rmax))
+    phi0 = -std::fabs(std::asin(0.5 * Rmax * kmax));
   else
-    phi0 = -fabs(acos(1 / (Rmax * kmax)));
+    phi0 = -std::fabs(std::acos(1 / (Rmax * kmax)));
 
-  marker_num = (int)2 * fabs(phi0) / Dphi + 1; //maximum number of paths--remains fixed
-  ROS_INFO("----marker_num=  %d", marker_num);
+  marker_num = static_cast<int>(2 * std::fabs(phi0) / Dphi + 1);
+  RCLCPP_INFO(node_->get_logger(), "----marker_num=  %d", marker_num);
 
-  nh.setParam("dwal_clustering/Marker_num", marker_num); //set marker_num to param server
+  auto client = std::make_shared<rclcpp::SyncParametersClient>(node_, "/dwal_planner/dwal_clustering");
+  client->set_parameters({ rclcpp::Parameter("dwal_clustering/Marker_num", marker_num) });
 
-  dwal_planner::Sampled_Path path;
+  paths.reserve(static_cast<size_t>(marker_num));
   for (int k = 0; k < marker_num; k++)
-    paths.push_back(path);
+    paths.emplace_back();
 
   tp.setParameters(sim_period, DS, alpha, kmax, Dphi, &alims, levels);
 
@@ -156,12 +216,12 @@ TrajectoryGenerator::TrajectoryGenerator() // @suppress("Class members should be
   cluster.pose0.resize(3);
   cluster.levels = levels;
 
-  path_marker.header.frame_id = "odom";
-  path_marker.header.stamp = ros::Time::now();
+  path_marker.header.frame_id = "map";
+  path_marker.header.stamp = node_->now();
   path_marker.ns = "dwal_planner";
   path_marker.id = 0;
-  path_marker.type = visualization_msgs::Marker::LINE_STRIP;
-  path_marker.action = visualization_msgs::Marker::ADD;
+  path_marker.type = visualization_msgs::msg::Marker::LINE_STRIP;
+  path_marker.action = visualization_msgs::msg::Marker::ADD;
   path_marker.pose.orientation.x = 0.0;
   path_marker.pose.orientation.y = 0.0;
   path_marker.pose.orientation.z = 0.0;
@@ -178,34 +238,37 @@ TrajectoryGenerator::TrajectoryGenerator() // @suppress("Class members should be
   }
 }
 
-
-TrajectoryGenerator::~TrajectoryGenerator() {
-
+TrajectoryGenerator::~TrajectoryGenerator()
+{
   delete cmap_model;
   delete costmap;
-  delete tfl;
-  delete tfBuff;
 }
-
 
 int main(int argc, char **argv)
 {
+  rclcpp::init(argc, argv);
 
-  ros::init(argc, argv, "dwal_generator");
+  auto node = std::make_shared<rclcpp::Node>("dwal_generator");
 
-  TrajectoryGenerator o;
-  o.odom_subscriber = o.nh.subscribe<nav_msgs::Odometry>(o.odom_Topic, 1, &TrajectoryGenerator::odomHandler, &o);
-  o.sampledCl_publisher = o.nh.advertise<dwal_planner::Sampled_Cluster>("sampled_paths", 2);
-  o.sampledCl_markers_publisher = o.nh.advertise<visualization_msgs::MarkerArray>("sampled_pathMarkers", 2);
+  TrajectoryGenerator generator(node);
 
-  ros::Rate r(o.Hz);
+  std::cout << generator.odom_Topic << "\n";
+  generator.sampledCl_publisher = node->create_publisher<dwal_planner::msg::SampledCluster>("sampled_paths", rclcpp::QoS(2));
+  generator.sampledCl_markers_publisher = node->create_publisher<visualization_msgs::msg::MarkerArray>("sampled_pathMarkers", rclcpp::QoS(2));
+  generator.odom_subscriber = node->create_subscription<nav_msgs::msg::Odometry>(
+    generator.odom_Topic, rclcpp::QoS(1),
+    std::bind(&TrajectoryGenerator::odomHandler, &generator, std::placeholders::_1));
 
-  while (ros::ok())
+  double hz = generator.Hz;
+  node->get_parameter("dwal_generator/Hz", hz);
+  rclcpp::Rate r(hz);
+
+  while (rclcpp::ok())
   {
-    ros::spinOnce();
+    rclcpp::spin_some(node);
     r.sleep();
   }
 
-  return (0);
-
+  rclcpp::shutdown();
+  return 0;
 }

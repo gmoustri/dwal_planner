@@ -7,7 +7,7 @@ The DWAL Planner is a ROS package for creating motion clusters while moving in a
 
 - a robot
 - an odometry source
-- a laserscan source
+- a valid costmap
 - a working tf
 
 The **tf** should include the transformation of *base\_link* to the *odom* frame, as well as the laser frame to the *base\_link* frame.
@@ -42,12 +42,12 @@ For more technical information see the papers below:
 
 ## Installation
 
-Download the package into your ROS workspace and catkin_make it. This is a ROS 1 version (noetic build).
+Download the package into your ROS workspace and colcon build it. This is a ROS 2 version (jazzy build).
 ```sh
 cd catkin_workspace/src
 git clone https://github.com/gmoustri/dwal_planner.git
 cd ../
-catkin_make
+colcon build
 ```
 
 ## How to run
@@ -55,12 +55,12 @@ catkin_make
 Just launch the dwal.launch file.
 
 ```sh
-roslaunch dwal_planner dwal.launch
+ros2 launch dwal_planner dwal_planner.launch.py
 ```
 ## Nodes
 ### Node: dwal_generator
 
-This node receives the laser scan and the odometric information, and produces the path bundle i.e. all the simulated paths up to their colission point. It creates the rolling costmap which follows the robot, marking obstacles along the way. The costmap only marks the space *ahead*.
+This node receives the costmap and the odometric information, and produces the path bundle i.e. all the simulated paths up to their colission point.
 
 
 #### Subscribed Topics
@@ -69,9 +69,7 @@ This node receives the laser scan and the odometric information, and produces th
 
     The odometry topic. This is defined by the */odometryTopic* parameter.
 
-* **`/[Laser Topic]`** ([sensor_msgs/LaserScan])
-
-    The topic of the lidar sensor facing forwards. This is used by the costmap and is defined in the corresponding costmap parameters (see [below](#costmap-parameters)).
+* **`/[Costmap Topic]`** ([nav_msgs/OccupancyGrid])
 
 #### Published Topics
 
@@ -115,7 +113,7 @@ This node receives the sampled path bundle from the *dwal_generator* node and pe
     Perform directional slicing between source and target cluster groups.
 
 ## Parameters
-The parameters are broken into 3 groups; the first defines the rolling costamp; the second defines the generation of the paths and the third sets the clustering conditions. These are located in the file **dwal_params.yaml** in the top folder.
+The parameters are located in the file **config/dwal_params.yaml**.
 
 ### General Parameters
 
@@ -123,35 +121,17 @@ The parameters are broken into 3 groups; the first defines the rolling costamp; 
 
     The name of the odometry topic. 
 
-### Costmap Parameters
-* **`dwal_generator/dwal_cmap`** 
+* **`occ_topic`** (string, default: "/occupancy_map_local")
 
-Parameters for the rolling costmap. See <a href="http://wiki.ros.org/costmap_2d#costmap_2d.2Flayered.Parameters">here</a> for details. An example is given below:
-   
-```yaml
-dwal_generator/dwal_cmap:
-  footprint: [[-0.1,-0.3], [-0.1,0.3], [0.8,0.3], [0.8,-0.3]]
-  global_frame: odom
-  robot_base_frame: base_link
-  rolling_window: true
-  update_frequency: 5.0
-  publish_frequency: 2.0
-  transform_tolerance : 0.4
-  width: 9.0
-  height: 9.0
-  max_obstacle_height: 1.5
-  obstacle_range: 4
-  raytrace_range: 4.5
-  resolution: 0.1
-  inflation_radius: 0.1
-  plugins: 
-    - {name: obstacles, type: "costmap_2d::VoxelLayer"}
-    - {name: inflation, type: "costmap_2d::InflationLayer"}
-  obstacles:
-    observation_sources: laser_scanner_front
-    laser_scanner_front: {data_type: LaserScan, topic: /front_scan, sensor_frame: front_laser, marking: true, clearing: true,  observation_persistence: 0.5}
-```
-The costamp does not use an external map. Thus the *global\_frame* parameter **should be _odom_**. Also, the *footprint* parameter is used to calculate the colission with the robot's footprint.
+    The name of the costmap topic. 
+
+* **`footprint`** (vector<double>, default: "{}")
+
+    The footprint (polygon) of the robot. 
+
+* **`resolution`** (double, default: "0.2")
+
+    Resolution of the costmap that the algorithm subscribes to. 
 
 ### Path Generation Parameters
 
@@ -275,6 +255,7 @@ BSD-3-Clause license
 
 
 [nav_msgs/odometry]: http://docs.ros.org/en/noetic/api/nav_msgs/html/msg/Odometry.html
+[nav_msgs/OccupancyGrid]: http://docs.ros.org/en/noetic/api/nav_msgs/html/msg/OccupancyGrid.html
 [visualization_msgs/MarkerArray]: http://docs.ros.org/en/noetic/api/visualization_msgs/html/msg/MarkerArray.html
 [sensor_msgs/LaserScan]: http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/LaserScan.html
 [dwal_planner/Cluster_Group]: https://github.com/gmoustri/dwal_planner/blob/main/msg/Cluster_Group.msg
