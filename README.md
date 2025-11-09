@@ -72,6 +72,8 @@ This node receives the costmap and the odometric information, and produces the p
 
 * **`/[Costmap Topic]`** ([nav_msgs/OccupancyGrid])
 
+    The costmap topic. This is defined by the */occ_topic* parameter.
+
 #### Published Topics
 
 * **`~/sampled_paths`** ([dwal_planner/Sampled_Cluster])
