@@ -11,7 +11,7 @@ The DWAL Planner is a ROS package for creating motion clusters while moving in a
 - a working tf
 
 The **tf** should include the transformation of *base\_link* to the *odom* frame, as well as the laser frame to the *base\_link* frame. 
-This is a ROS2 branch. For a ROS1 implementation see the related branch.
+This is a **ROS2** branch. For a **ROS1* implementation see the related branch.
 
 **Author: George Moustris<br />
 Affiliation: [Intelligent Robotics & Automation Lab @ ECE/NTUA](https://www.robotics.ntua.gr/)<br />**
@@ -45,7 +45,7 @@ For more technical information see the papers below:
 
 Download the package into your ROS workspace and colcon build it. This is a ROS 2 version (jazzy build).
 ```sh
-cd catkin_workspace/src
+cd ros2_ws/src
 git clone https://github.com/gmoustri/dwal_planner.git
 cd ../
 colcon build
