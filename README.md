@@ -76,7 +76,7 @@ This node receives the costmap and the odometric information, and produces the p
 
 #### Published Topics
 
-* **`~/sampled_paths`** ([dwal_planner/Sampled_Cluster])
+* **`~/sampled_paths`** ([dwal_planner/SampledCluster])
 
     This topic contains the path bundle in a custom message type.
     
@@ -91,13 +91,13 @@ This node receives the sampled path bundle from the *dwal_generator* node and pe
 
 #### Subscribed Topics
 
-* **`~/sampled_paths`** ([dwal_planner/Sampled_Cluster])
+* **`~/sampled_paths`** ([dwal_planner/SampledCluster])
 
     The path bundle as published by the *dwal_generator* node
 
 #### Published Topics
 
-* **`~/clusters_[postfix]`** ([dwal_planner/Cluster_Group])
+* **`~/clusters_[postfix]`** ([dwal_planner/ClusterGroup])
 
     This topic contains the path cluster of the specific level. Corresponds to one topic per level, as defined in the [Path Clustering Parameters](#path-clustering-parameters)
     
@@ -261,6 +261,6 @@ BSD-3-Clause license
 [nav_msgs/OccupancyGrid]: http://docs.ros.org/en/noetic/api/nav_msgs/html/msg/OccupancyGrid.html
 [visualization_msgs/MarkerArray]: http://docs.ros.org/en/noetic/api/visualization_msgs/html/msg/MarkerArray.html
 [sensor_msgs/LaserScan]: http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/LaserScan.html
-[dwal_planner/Cluster_Group]: https://github.com/gmoustri/dwal_planner/blob/main/msg/Cluster_Group.msg
-[dwal_planner/Sampled_Cluster]: https://github.com/gmoustri/dwal_planner/blob/main/msg/Sampled_Cluster.msg
+[dwal_planner/ClusterGroup]: https://github.com/gmoustri/dwal_planner/blob/main/msg/ClusterGroup.msg
+[dwal_planner/SampledCluster]: https://github.com/gmoustri/dwal_planner/blob/main/msg/SampledCluster.msg
 [std_srvs/Empty]: http://docs.ros.org/en/noetic/api/std_srvs/html/srv/Empty.html
