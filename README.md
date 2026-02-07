@@ -75,7 +75,7 @@ This node receives the laser scan and the odometric information, and produces th
 
 #### Published Topics
 
-* **`~/sampled_paths`** ([dwal_planner/Sampled_Cluster])
+* **`~/sampled_paths`** ([dwal_planner/SampledCluster])
 
     This topic contains the path bundle in a custom message type.
     
@@ -90,13 +90,13 @@ This node receives the sampled path bundle from the *dwal_generator* node and pe
 
 #### Subscribed Topics
 
-* **`~/sampled_paths`** ([dwal_planner/Sampled_Cluster])
+* **`~/sampled_paths`** ([dwal_planner/SampledCluster])
 
     The path bundle as published by the *dwal_generator* node
 
 #### Published Topics
 
-* **`~/clusters_[postfix]`** ([dwal_planner/Cluster_Group])
+* **`~/clusters_[postfix]`** ([dwal_planner/ClusterGroup])
 
     This topic contains the path cluster of the specific level. Corresponds to one topic per level, as defined in the [Path Clustering Parameters](#path-clustering-parameters)
     
