@@ -70,7 +70,7 @@ public:
 
     RCLCPP_INFO(node_->get_logger(), "Marker_num received: %d", marker_num);
     // Init marker template
-    path_marker.header.frame_id = "map";
+    path_marker.header.frame_id = "odom";
     path_marker.header.stamp = node_->now();
     path_marker.ns = "dwal_planner";
     path_marker.id = 0;

@@ -11,9 +11,8 @@
 # Parameters for the dwal_generator node
 "/dwal_planner/dwal_generator":
   ros__parameters:
-    odometryTopic: "/Odometry"  
-
-    occ_topic: "/move_base/local_costmap/costmap"
+    odometryTopic: "/odom"  
+    occ_topic: "/local_costmap/costmap"
     footprint: [0.362, 0.308, 0.362, -0.308, -0.362, -0.308, -0.362, 0.308]
 
     "dwal_generator/acc_lim_x": 1.5
@@ -27,7 +26,7 @@
     "dwal_generator/Kmax": 2.0
     "dwal_generator/Hz": 30.0
 
-    "dwal_generator/dwal_cmap/resolution": 0.15
+    "dwal_generator/alpha": 0.05
 
     # duplicate of dwal_clustering param for convenience
     "dwal_clustering/levels": [2.0]

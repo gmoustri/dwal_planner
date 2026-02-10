@@ -160,8 +160,16 @@ int SimpleTrajectoryGenerator::initialise(const std::vector<double> &pos, const 
   max_vel[1] = std::min(limits_->max_vel_theta, vel[1] + acc_lim[2] * sim_period_);
   min_vel[1] = std::max(-limits_->max_vel_theta, vel[1] - acc_lim[2] * sim_period_);
 
-  minCurv = std::max(-kmax_, min_vel[1] / max_vel[0]); // min curvature = min w / max v
-  maxCurv = std::min(kmax_, max_vel[1] / min_vel[0]);  // max curvature = max w / min v
+  if (max_vel[1]>=0)
+    maxCurv = std::clamp(max_vel[1] / min_vel[0], -kmax_, kmax_);  // max curvature = max w / min v
+  else
+    maxCurv = std::clamp(max_vel[1] / max_vel[0], -kmax_, kmax_);  // max curvature = max w / max v
+  
+  if (min_vel[1]<=0)
+    minCurv = std::clamp( min_vel[1] / min_vel[0],-kmax_, kmax_); // min curvature = min w / min v
+  else
+    minCurv = std::clamp( min_vel[1] / max_vel[0], -kmax_, kmax_); // min curvature = min w / max v
+  
 
   // create vector with sample curvatures
   double phi0, phin;
@@ -295,7 +303,7 @@ int SimpleTrajectoryGenerator::generateTrajectory(double sample_curv, dwal_plann
   return 1; // trajectory does not collide (until last step)
 }
 
-int SimpleTrajectoryGenerator::getTrajectories2(std::vector<dwal_planner::msg::SampledPath> &trajs,
+int SimpleTrajectoryGenerator::getTrajectoriesWithFootprint(std::vector<dwal_planner::msg::SampledPath> &trajs,
                                                 costmap_2d::Costmap2DROS *costmap,
                                                 base_local_planner::CostmapModel *cmap_model)
 {
@@ -305,13 +313,13 @@ int SimpleTrajectoryGenerator::getTrajectories2(std::vector<dwal_planner::msg::S
   // loop over trajectories and sample them
   for (int k = 0; k < Curv_num_; k++)
   {
-    result += generateTrajectory2(curvs_[next_sample_index_], trajs[next_sample_index_], costmap, cmap_model);
+    result += generateTrajectoryWithFootprint(curvs_[next_sample_index_], trajs[next_sample_index_], costmap, cmap_model);
     next_sample_index_++;
   }
   return result;
 }
 
-int SimpleTrajectoryGenerator::generateTrajectory2(double sample_curv, dwal_planner::msg::SampledPath &traj,
+int SimpleTrajectoryGenerator::generateTrajectoryWithFootprint(double sample_curv, dwal_planner::msg::SampledPath &traj,
                                                    costmap_2d::Costmap2DROS *costmap,
                                                    base_local_planner::CostmapModel *cmap_model)
 {
@@ -378,7 +386,8 @@ int SimpleTrajectoryGenerator::generateTrajectory2(double sample_curv, dwal_plan
 
     footprintCost = cmap_model->footprintCost(x, y, theta, costmap->getRobotFootprint());
 
-    if (footprintCost < 0 || footprintCost >= nav2_costmap_2d::LETHAL_OBSTACLE || footprintCost == nav2_costmap_2d::NO_INFORMATION)      
+    // if (footprintCost < 0 || footprintCost >= nav2_costmap_2d::LETHAL_OBSTACLE || footprintCost == nav2_costmap_2d::NO_INFORMATION)      
+    if (0)      
     { 
       traj.costs.back() = 255; // trajectory collides.
       traj.colission_r = std::sqrt(Rp2);

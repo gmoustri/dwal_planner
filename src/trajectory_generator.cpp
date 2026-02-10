@@ -58,9 +58,14 @@ public:
     pos[0] = msg->pose.pose.position.x;
     pos[1] = msg->pose.pose.position.y;
     pos[2] = tf2::getYaw(msg->pose.pose.orientation);
+    
+    double v_,w_;
+    v_=msg->twist.twist.linear.x;
+    w_=msg->twist.twist.angular.z ;
 
-    vel[0] = msg->twist.twist.linear.x;
-    vel[1] = msg->twist.twist.angular.z;
+    //enforce bounds
+    vel[0] = abs(v_) > alims.max_vel_trans ? sgn(v_)*alims.max_vel_trans : v_;
+    vel[1] = abs(w_) > alims.max_vel_theta ? sgn(w_)*alims.max_vel_theta : w_;
 
     path_num = tp.initialise(pos, vel, Rmax);
 
@@ -70,7 +75,7 @@ public:
       return;
     }
     // tp.getTrajectories(paths, costmap);
-    tp.getTrajectories2(paths, costmap, cmap_model);
+    tp.getTrajectoriesWithFootprint(paths, costmap, cmap_model);
 
     cluster.paths.clear();
     cluster.pose0.clear();
@@ -114,7 +119,7 @@ TrajectoryGenerator::TrajectoryGenerator(const std::shared_ptr<rclcpp::Node>& no
   node_->get_parameter("footprint", footprint_xy);
 
   try {
-    tfBuff->lookupTransform("base_link", "map", tf2::TimePointZero, std::chrono::seconds(3));
+    tfBuff->lookupTransform("base_link", "odom", tf2::TimePointZero, std::chrono::seconds(3));
   } catch (const tf2::TransformException &ex) {
     RCLCPP_WARN(node_->get_logger(), "%s", ex.what());
     rclcpp::sleep_for(std::chrono::seconds(1));
@@ -160,7 +165,7 @@ TrajectoryGenerator::TrajectoryGenerator(const std::shared_ptr<rclcpp::Node>& no
 
   node_->declare_parameter<double>("dwal_generator/sim_period", 0.2);
   node_->declare_parameter<double>("dwal_generator/DS", 0.1);
-  node_->declare_parameter<double>("dwal_generator/dwal_cmap/resolution", 0.2);
+  node_->declare_parameter<double>("dwal_generator/alpha", 0.2);
   node_->declare_parameter<double>("dwal_generator/Kmax", 2.0);
   node_->declare_parameter<double>("dwal_generator/Hz", 5.0);
   node_->declare_parameter<std::vector<double>>("dwal_clustering/levels", {});
@@ -176,7 +181,7 @@ TrajectoryGenerator::TrajectoryGenerator(const std::shared_ptr<rclcpp::Node>& no
 
   node_->get_parameter("dwal_generator/sim_period", sim_period);
   node_->get_parameter("dwal_generator/DS",         DS);
-  node_->get_parameter("dwal_generator/dwal_cmap/resolution", alpha);
+  node_->get_parameter("dwal_generator/alpha", alpha);
   node_->get_parameter("dwal_generator/Kmax",       kmax);
   node_->get_parameter("dwal_generator/Hz",         Hz);
   node_->get_parameter("dwal_clustering/levels",    levels);
@@ -191,6 +196,10 @@ TrajectoryGenerator::TrajectoryGenerator(const std::shared_ptr<rclcpp::Node>& no
     rclcpp::shutdown();
     return;
   }
+
+  RCLCPP_INFO(node_->get_logger(), " --> max_vel_trans = %f", alims.max_vel_trans);
+  RCLCPP_INFO(node_->get_logger(), " --> min_vel_trans = %f", alims.min_vel_trans);
+  RCLCPP_INFO(node_->get_logger(), " --> max_vel_theta = %f", alims.max_vel_theta);
 
   Rmax = levels.back();
 
@@ -216,7 +225,7 @@ TrajectoryGenerator::TrajectoryGenerator(const std::shared_ptr<rclcpp::Node>& no
   cluster.pose0.resize(3);
   cluster.levels = levels;
 
-  path_marker.header.frame_id = "map";
+  path_marker.header.frame_id = "odom";
   path_marker.header.stamp = node_->now();
   path_marker.ns = "dwal_planner";
   path_marker.id = 0;

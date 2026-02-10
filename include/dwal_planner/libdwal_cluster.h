@@ -161,9 +161,9 @@ public:
   int getTrajectories(std::vector<dwal_planner::msg::SampledPath> &path, costmap_2d::Costmap2DROS *costmap);
   int generateTrajectory(double sample_curv, dwal_planner::msg::SampledPath &path, costmap_2d::Costmap2DROS *costmap);
 
-  int getTrajectories2(std::vector<dwal_planner::msg::SampledPath> &path, costmap_2d::Costmap2DROS *costmap,
+  int getTrajectoriesWithFootprint(std::vector<dwal_planner::msg::SampledPath> &path, costmap_2d::Costmap2DROS *costmap,
                        base_local_planner::CostmapModel *cmap_model);
-  int generateTrajectory2(double sample_curv, dwal_planner::msg::SampledPath &path, costmap_2d::Costmap2DROS *costmap,
+  int generateTrajectoryWithFootprint(double sample_curv, dwal_planner::msg::SampledPath &path, costmap_2d::Costmap2DROS *costmap,
                           base_local_planner::CostmapModel *cmap_model);
 
 protected:
