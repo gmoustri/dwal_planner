@@ -165,7 +165,7 @@ The parameters are located in the file **config/dwal_params.yaml**.
 
     maximum (and minimum) curvature of simulated paths. Minimum curvature is *-Kmax*
   
-  * **`alpha`** (double, default: "0.2")
+* **`alpha`** (double, default: "0.2")
 
     generate paths every "alpha" meters on the level's circle. Essentially the chord length between consecutive paths
     
