@@ -159,7 +159,7 @@ The parameters are located in the file **config/dwal_params.yaml**.
     
 * **`dwal_generator\sim_period`** (number, default: 0.2)
 
-    time window to calculate the maximum velocities for the Dynamic Window. For example, the maximum linear velocity is v_cur+acc_lim_th\*sim_period where v_cur is the robot's current linear velocity
+    time window to calculate the maximum velocities for the Dynamic Window. For example, the maximum linear velocity is v_cur+acc_lim_x\*sim_period where v_cur is the robot's current linear velocity
 
 * **`dwal_generator\DS`** (number, default: 0.1)
 
