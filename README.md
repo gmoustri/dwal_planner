@@ -132,10 +132,6 @@ The parameters are located in the file **config/dwal_params.yaml**.
 
     The footprint (polygon) of the robot. 
 
-* **`resolution`** (double, default: "0.2")
-
-    Resolution of the costmap that the algorithm subscribes to. 
-
 ### Path Generation Parameters
 
 * **`dwal_generator\max_vel_trans`** (number, default: 0.3)
@@ -168,6 +164,10 @@ The parameters are located in the file **config/dwal_params.yaml**.
 * **`dwal_generator\Kmax`** (number, default: 2.0)
 
     maximum (and minimum) curvature of simulated paths. Minimum curvature is *-Kmax*
+  
+  * **`alpha`** (double, default: "0.2")
+
+    generate paths every "alpha" meters on the level's circle. Essentially the chord length between consecutive paths
     
 * **`dwal_generator\Hz`** (number, default: 10.0)
 
