@@ -385,11 +385,9 @@ int SimpleTrajectoryGenerator::generateTrajectoryWithFootprint(double sample_cur
     }
 
     footprintCost = cmap_model->footprintCost(x, y, theta, costmap->getRobotFootprint());
-
-    // if (footprintCost < 0 || footprintCost >= nav2_costmap_2d::LETHAL_OBSTACLE || footprintCost == nav2_costmap_2d::NO_INFORMATION)      
-    if (0)      
-    { 
-      traj.costs.back() = 255; // trajectory collides.
+    if (footprintCost != nav2_costmap_2d::NO_INFORMATION  && footprintCost > nav2_costmap_2d::MAX_NON_OBSTACLE)      
+    {    
+      traj.costs.back() = nav2_costmap_2d::LETHAL_OBSTACLE; // trajectory collides.
       traj.colission_r = std::sqrt(Rp2);
       stop = true;
     }

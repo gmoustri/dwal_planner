@@ -106,7 +106,7 @@ private:
       } else if (v >= 100) {
         dst[i] = nav2_costmap_2d::LETHAL_OBSTACLE;  // 254
       } else {
-        dst[i] = static_cast<unsigned char>((v * 252) / 100); // 0..252
+        dst[i] = static_cast<unsigned char>(((double)v *254.0)/100.0); // 0-99 maps to 0..251 due to integer casting 
       }
     }
   }

@@ -13,8 +13,8 @@
   ros__parameters:
     odometryTopic: "/odom"  
     occ_topic: "/local_costmap/costmap"
-    footprint: [0.362, 0.308, 0.362, -0.308, -0.362, -0.308, -0.362, 0.308]
-
+  #  footprint: [0.362, 0.308, 0.362, -0.308, -0.362, -0.308, -0.362, 0.308]
+    footprint: [0.1, 0.1, 0.1, -0.1, -0.1, -0.1, -0.1, 0.1]
     "dwal_generator/acc_lim_x": 1.5
     "dwal_generator/acc_lim_th": 3.2
     "dwal_generator/max_trans_vel": 0.3
