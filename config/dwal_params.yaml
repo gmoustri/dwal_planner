@@ -17,7 +17,7 @@
     footprint: [0.1, 0.1, 0.1, -0.1, -0.1, -0.1, -0.1, 0.1]
     "dwal_generator/acc_lim_x": 1.5
     "dwal_generator/acc_lim_th": 3.2
-    "dwal_generator/max_trans_vel": 0.3
+    "dwal_generator/max_trans_vel": 0.5
     "dwal_generator/min_trans_vel": 0.1
     "dwal_generator/max_vel_theta": 1.0
 

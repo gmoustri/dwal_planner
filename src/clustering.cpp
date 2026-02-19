@@ -303,6 +303,7 @@ public:
       tmp_cluster.paths.clear(); //clear temp cluster
       tmp_cluster.id = 100; //start with id=100. Will change in correspondence matching later
       tmp_cluster.r = Rcl;
+      tmp_cluster.pose0 = msg->pose0;
       for (int &l : clvec)
       {
         j = 0;
