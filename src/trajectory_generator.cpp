@@ -60,7 +60,7 @@ public:
     pos[2] = tf2::getYaw(msg->pose.pose.orientation);
     
     double v_,w_;
-    v_=msg->twist.twist.linear.x;
+    v_=std::fabs(msg->twist.twist.linear.x); //enforce forward motion
     w_=msg->twist.twist.angular.z ;
 
     //enforce bounds
@@ -272,10 +272,18 @@ int main(int argc, char **argv)
   node->get_parameter("dwal_generator/Hz", hz);
   rclcpp::Rate r(hz);
 
+  rclcpp::Time t0 = node->get_clock()->now();
+  rclcpp::Time tini =t0;
+
   while (rclcpp::ok())
   {
     rclcpp::spin_some(node);
     r.sleep();
+    if(node->get_clock()->now()-t0 > rclcpp::Duration(2,0))
+    {
+      t0 = node->get_clock()->now();
+      RCLCPP_INFO(node->get_logger(), "Spinning: T= %f passed", (t0-tini).seconds());
+    }
   }
 
   rclcpp::shutdown();
