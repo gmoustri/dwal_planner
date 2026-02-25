@@ -304,6 +304,7 @@ public:
       tmp_cluster.id = 100; //start with id=100. Will change in correspondence matching later
       tmp_cluster.r = Rcl;
       tmp_cluster.pose0 = msg->pose0;
+      
       for (int &l : clvec)
       {
         j = 0;
@@ -314,7 +315,8 @@ public:
             p0.x = p.x;
             p0.y = p.y;
             path_array_marker.markers[static_cast<size_t>(l)].points.push_back(p0);
-            if (j >= static_cast<int>(msg->paths[static_cast<size_t>(l)].level_inds[static_cast<size_t>(level_index)]))
+            
+            if ( j >= static_cast<int>(msg->paths[l].level_inds[level_index]) )
               break;
             j++;
           }
@@ -322,10 +324,11 @@ public:
         tmp_path.curvature = msg->paths[static_cast<size_t>(l)].curvature;
         tmp_path.phi = cluster_lib::curv2phi(msg->paths[static_cast<size_t>(l)].curvature, Rcl);
         tmp_path.cost = msg->paths[static_cast<size_t>(l)].costs[static_cast<size_t>(level_index)];
-        tmp_cluster.paths.push_back(tmp_path); //add path to current cluster
+        tmp_cluster.paths.push_back(tmp_path); //add path to current cluster    
       }
       group.clusters.push_back(tmp_cluster);
     }
+
     findCorrespondence(); //set cluster ids according to correspondence matching
 
     if (*spin != 0)
@@ -406,6 +409,7 @@ public:
     spin.clear();
     spin.reserve(spin64.size());
     for (auto v : spin64) spin.push_back(static_cast<int>(v));
+
     group_num = postfixes.size();
     if (group_num != levels.size())
     {
@@ -415,6 +419,8 @@ public:
       rclcpp::shutdown();
       return;
     }
+    RCLCPP_INFO(ros_node->get_logger(), "Cluster groups to be created: %zu", group_num);
+    RCLCPP_INFO(ros_node->get_logger(), "Cluster postfixes: %s (%.2f m), %s (%.2f m)", postfixes[0].c_str(),levels[0], postfixes[1].c_str(),levels[1]);
 
     do_slice = false;
     group_objects.reserve(group_num);

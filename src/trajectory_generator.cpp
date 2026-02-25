@@ -21,6 +21,8 @@
 #include <dwal_planner/msg/sampled_cluster.hpp>
 #include <dwal_planner/msg/sampled_path.hpp>
 #include <dwal_planner/msg/pose2_d32.hpp>
+#include <nav2_costmap_2d/footprint.hpp>
+
 
 class TrajectoryGenerator
 {
@@ -116,7 +118,18 @@ TrajectoryGenerator::TrajectoryGenerator(const std::shared_ptr<rclcpp::Node>& no
 
   node_->declare_parameter<std::vector<double>>("footprint", {});
   std::vector<double> footprint_xy;
-  node_->get_parameter("footprint", footprint_xy);
+  if (!node_->get_parameter("footprint", footprint_xy)) {
+    RCLCPP_FATAL(node_->get_logger(), "Missing 'footprint' parameter");
+    throw std::runtime_error("Missing footprint parameter");
+  }
+
+  node_->declare_parameter<double>("footprint_padding", 0.0);
+  double footprint_padding = 0.0;
+  node_->get_parameter("footprint_padding", footprint_padding);
+  if (footprint_padding < 0.0) {
+    RCLCPP_FATAL(node_->get_logger(), "'footprint_padding' must be >= 0");
+    throw std::runtime_error("Invalid footprint_padding");
+  }
 
   try {
     tfBuff->lookupTransform("base_link", "odom", tf2::TimePointZero, std::chrono::seconds(3));
@@ -137,20 +150,36 @@ TrajectoryGenerator::TrajectoryGenerator(const std::shared_ptr<rclcpp::Node>& no
   }
   cmap_model = new base_local_planner::CostmapModel(costmap->getCostmap());
 
+  // create footprint from parameter
   std::vector<geometry_msgs::msg::Point> fp;
-  if (footprint_xy.size() >= 6 && footprint_xy.size() % 2 == 0) {
-    fp.reserve(footprint_xy.size()/2);
+  if (footprint_xy.size() == 1) {
+    // Circular footprint
+    const double r = footprint_xy[0];
+    if (r <= 0.0) {
+      throw std::runtime_error("Footprint radius must be > 0");
+    }
+
+    fp = nav2_costmap_2d::makeFootprintFromRadius(r);
+  }
+  else if (footprint_xy.size() >= 6 && footprint_xy.size() % 2 == 0) {
+    // Polygon footprint
+    fp.reserve(footprint_xy.size() / 2);
     for (size_t i = 0; i < footprint_xy.size(); i += 2) {
       geometry_msgs::msg::Point p;
-      p.x = footprint_xy[i]; p.y = footprint_xy[i+1]; p.z = 0.0;
+      p.x = footprint_xy[i];
+      p.y = footprint_xy[i + 1];
+      p.z = 0.0;
       fp.push_back(p);
     }
   }
   else {
     RCLCPP_FATAL(node_->get_logger(),
-                "Footprint parameter malformed or too short; using default footprint");
-    throw(std::runtime_error("Footprint parameter malformed or too short"));
+                "Footprint malformed. Use [radius] or flat polygon [x1,y1,...]");
+    throw std::runtime_error("Footprint malformed");
   }
+
+  nav2_costmap_2d::padFootprint(fp, footprint_padding); //add padding to the footprint if requested
+
   costmap->setRobotFootprint(fp);
 
   pos.resize(3);
