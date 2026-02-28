@@ -1,21 +1,32 @@
 # Parameters for the dwal_clustering node
 "/dwal_planner/dwal_clustering":
   ros__parameters:
+     #common parameters. COPY TO DWAL GENERATOR NODE AS WELL 
+    "common/levels": [1.0, 2.0]           #cross-check with dwal_generator
+    "common/odom_frame": "odom"           #cross-check with dwal_generator
+
     "dwal_clustering/postfix": ['near', 'far']  # cluster topic postfixes to subscribe to
-    "dwal_clustering/levels": [1.0, 2.0]
-    "dwal_clustering/spin": [1, 1]           
+    "dwal_clustering/spin": [1, 1]              
     "dwal_clustering/min_cluster_span": 0.2
     "dwal_clustering/cluster_separation": 5
+
 
 
 # Parameters for the dwal_generator node
 "/dwal_planner/dwal_generator":
   ros__parameters:
-    odometryTopic: "/odom"  
-    occ_topic: "/local_costmap/costmap"
+
+    #common parameters
+    "common/levels": [1.0, 2.0]      # cross-check with dwal_clustering
+    "common/odom_frame": "odom"      # cross-check with dwal_clustering
+
+    "dwal_generator/odometryTopic": "/odom"  
+    "dwal_generator/occ_topic": "/local_costmap/costmap"
+    "dwal_generator/base_frame": "base_link"
+
   #  footprint: [0.362, 0.308, 0.362, -0.308, -0.362, -0.308, -0.362, 0.308]
-    footprint: [0.1]
-    footprint_padding: 0.1
+    "dwal_generator/footprint": [0.1]
+    "dwal_generator/footprint_padding": 0.1
     "dwal_generator/acc_lim_x": 1.5
     "dwal_generator/acc_lim_th": 3.2
     "dwal_generator/max_trans_vel": 0.5
@@ -25,9 +36,6 @@
     "dwal_generator/sim_period": 0.2
     "dwal_generator/DS": 0.1
     "dwal_generator/Kmax": 4.0
-    "dwal_generator/Hz": 30.0
-
     "dwal_generator/alpha": 0.05
 
-    # duplicate of dwal_clustering param for convenience
-    "dwal_clustering/levels": [1.0, 2.0]
+  

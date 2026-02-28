@@ -118,25 +118,42 @@ This node receives the sampled path bundle from the *dwal_generator* node and pe
 ## Parameters
 The parameters are located in the file **config/dwal_params.yaml**.
 
-### General Parameters
+### Common Parameters
 
-* **`odometryTopic`** (string, default: "/odom")
+ * **`common\levels`** (array of numbers, default: [2.0])
+
+    defines the number of levels and the radii. By default it starts with only one level (see example below)
+
+* **`common\odom_frame`** (string, default: "odom")
+
+    name of the odometry frame
+
+### Path Generation Parameters
+
+* **`dwal_generator\odometryTopic`** (string, default: "/odom")
 
     The name of the odometry topic. 
 
-* **`occ_topic`** (string, default: "/occupancy_map_local")
+* **`dwal_generator\occ_topic`** (string, default: "/occupancy_map_local")
 
     The name of the costmap topic. 
 
-* **`footprint`** (vector<double>, default: "{}")
+* **`dwal_generator\base_frame`** (string, default: "base_link")
 
-    The footprint (polygon) of the robot. 
+    name of the robot's frame
 
-### Path Generation Parameters
+* **`dwal_generator\footprint`** (vector<double>, default: "{}")
+
+    The footprint (polygon) of the robot. Must be flat array e.g [0.1 0.1 0.3 0.4]. If array has length "1" e.g. [0.3], robot is considered circular with said radius
+
+* **`dwal_generator\footprint_padding`** (number, default: 0.0)
+
+    padding of the robot footprint. Set to 0 by default
 
 * **`dwal_generator\max_vel_trans`** (number, default: 0.3)
 
     maximum linear velocity for the Dynamic Window in m/sec
+
 * **`dwal_generator\min_vel_trans`** (number, default: 0.1)
 
     minimum linear velocity for the Dynamic Window in m/sec
@@ -155,7 +172,7 @@ The parameters are located in the file **config/dwal_params.yaml**.
     
 * **`dwal_generator\sim_period`** (number, default: 0.2)
 
-    time window to calculate the maximum velocities for the Dynamic Window. For example, the maximum linear velocity is v_cur+acc_lim_x\*sim_period where v_cur is the robot's current linear velocity
+    time window, in sec,to calculate the maximum velocities for the Dynamic Window. For example, the maximum linear velocity is v_cur+acc_lim_x\*sim_period where v_cur is the robot's current linear velocity
 
 * **`dwal_generator\DS`** (number, default: 0.1)
 
@@ -165,7 +182,7 @@ The parameters are located in the file **config/dwal_params.yaml**.
 
     maximum (and minimum) curvature of simulated paths. Minimum curvature is *-Kmax*
   
-* **`alpha`** (double, default: "0.2")
+* **`dwal_generator\alpha`** (double, default: "0.2")
 
     generate paths every "alpha" meters on the level's circle. Essentially the chord length between consecutive paths
     
@@ -183,10 +200,6 @@ The parameters are located in the file **config/dwal_params.yaml**.
  * **`dwal_clustering\cluster_separation`** (number, default: 5)
 
     minimum number of paths between clusters. Two cluster that are seperated by less than this number, are considered *one cluster*.  
-    
- * **`dwal_clustering\levels`** (array of numbers, default: [2.0])
-
-    defines the number of levels and the radii. By default it starts with only one level (see example below)
     
  * **`dwal_clustering\postfix`** (array of strings, default: ['near'])
 
@@ -223,6 +236,21 @@ dwal_clustering:
 
 ## Citations
 If you like this work and use it in your own, please cite the following publications:
+
+> Moustris, G. P., and C. S. Tzafestas.
+  > “**A Shared-Control Framework for A Human-Robot Front-Following Behaviour in Unknown Dynamic Environments.**” 
+  > In International Journal of Social Robotics 18.2 (2026): 31.
+
+        @article{moustris2026shared,
+        title={A Shared-Control Framework for A Human-Robot Front-Following Behaviour in Unknown Dynamic Environments},
+        author={Moustris, George and Tzafestas, Costas},
+        journal={International Journal of Social Robotics},
+        volume={18},
+        number={2},
+        pages={31},
+        year={2026},
+        publisher={Springer}
+        }
 
 * > Moustris, G. P., and C. S. Tzafestas.
   > “**Assistive Front-Following Control of an Intelligent Robotic Rollator Based on a Modified Dynamic Window Planner.**” 

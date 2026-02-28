@@ -58,6 +58,10 @@ public:
     node_->get_parameter("dwal_clustering/min_cluster_span", min_cluster_span);
     node_->get_parameter("dwal_clustering/cluster_separation", cluster_separation);
 
+    std::string odom_frame;
+    node_->declare_parameter<std::string>("common/odom_frame", "odom");
+    node_->get_parameter("common/odom_frame", odom_frame);
+
     // Wait until the generator sets a non-negative value
     marker_num = -1;
     while (rclcpp::ok() && marker_num < 0) {
@@ -70,7 +74,7 @@ public:
 
     RCLCPP_INFO(node_->get_logger(), "Marker_num received: %d", marker_num);
     // Init marker template
-    path_marker.header.frame_id = "odom";
+    path_marker.header.frame_id = odom_frame;
     path_marker.header.stamp = node_->now();
     path_marker.ns = "dwal_planner";
     path_marker.id = 0;
@@ -395,17 +399,17 @@ public:
     clusterTopic = "clusters_";
 
     ros_node->declare_parameter<std::vector<std::string>>("dwal_clustering/postfix", {});
-    ros_node->declare_parameter<std::vector<double>>("dwal_clustering/levels", {});
-    ros_node->declare_parameter<double>("dwal_generator/Hz", 5.0);
+    ros_node->declare_parameter<std::vector<double>>("common/levels", {});
     ros_node->declare_parameter<std::vector<int64_t>>("dwal_clustering/spin", {});
     ros_node->declare_parameter<double>("dwal_clustering/min_cluster_span", 0.5);
     ros_node->declare_parameter<int>("dwal_clustering/cluster_separation", 5);
     ros_node->declare_parameter<int>("dwal_clustering/Marker_num", -1);
 
     ros_node->get_parameter("dwal_clustering/postfix", postfixes);
-    ros_node->get_parameter("dwal_clustering/levels", levels);
-    ros_node->get_parameter("dwal_generator/Hz", Hz);
+    ros_node->get_parameter("common/levels", levels);
     ros_node->get_parameter("dwal_clustering/spin", spin64);
+
+
     spin.clear();
     spin.reserve(spin64.size());
     for (auto v : spin64) spin.push_back(static_cast<int>(v));
@@ -511,7 +515,6 @@ public:
     }
   }
 
-  double Hz{30.0};
 
   // ROS2 entities
   rclcpp::Subscription<dwal_planner::msg::SampledCluster>::SharedPtr sampled_cluster_subscriber;
@@ -536,15 +539,7 @@ int main(int argc, char **argv)
 
   ControlClass ctrlObj(node);
 
-  double hz = 30.0;
-  node->get_parameter("dwal_generator/Hz", hz);
-  rclcpp::Rate r(hz);
-
-  while (rclcpp::ok())
-  {
-    rclcpp::spin_some(node);
-    r.sleep();
-  }
+  rclcpp::spin(node);
 
   rclcpp::shutdown();
   return 0;

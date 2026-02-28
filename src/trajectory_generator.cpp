@@ -33,6 +33,8 @@ public:
 
   std::shared_ptr<rclcpp::Node> node_;
   std::string odom_Topic;
+  std::string odom_frame_;
+  std::string base_frame_;
 
   std::unique_ptr<tf2_ros::Buffer> tfBuff;
   std::unique_ptr<tf2_ros::TransformListener> tfl;
@@ -116,23 +118,30 @@ TrajectoryGenerator::TrajectoryGenerator(const std::shared_ptr<rclcpp::Node>& no
   std::string occ_topic = occ_topic_default;
   node_->get_parameter("occ_topic", occ_topic);
 
-  node_->declare_parameter<std::vector<double>>("footprint", {});
+  node_->declare_parameter<std::vector<double>>("dwal_generator/footprint", {});
   std::vector<double> footprint_xy;
-  if (!node_->get_parameter("footprint", footprint_xy)) {
-    RCLCPP_FATAL(node_->get_logger(), "Missing 'footprint' parameter");
+  if (!node_->get_parameter("dwal_generator/footprint", footprint_xy)) {
+    RCLCPP_FATAL(node_->get_logger(), "Missing 'dwal_generator/footprint' parameter");
     throw std::runtime_error("Missing footprint parameter");
   }
 
-  node_->declare_parameter<double>("footprint_padding", 0.0);
+  node_->declare_parameter<double>("dwal_generator/footprint_padding", 0.0);
   double footprint_padding = 0.0;
-  node_->get_parameter("footprint_padding", footprint_padding);
+  node_->get_parameter("dwal_generator/footprint_padding", footprint_padding);
   if (footprint_padding < 0.0) {
-    RCLCPP_FATAL(node_->get_logger(), "'footprint_padding' must be >= 0");
+    RCLCPP_FATAL(node_->get_logger(), "' dwal_generator/footprint_padding' must be >= 0");
     throw std::runtime_error("Invalid footprint_padding");
   }
 
+  node_->declare_parameter<std::string>("common/odom_frame", "odom");
+  node_->declare_parameter<std::string>("dwal_generator/base_frame", "base_link");
+  node_->get_parameter("common/odom_frame", odom_frame_);
+  node_->get_parameter("dwal_generator/base_frame", base_frame_);
+  RCLCPP_INFO(node_->get_logger(), "Using base_frame '%s' and odom_frame '%s'", base_frame_.c_str(), odom_frame_.c_str());
+
+
   try {
-    tfBuff->lookupTransform("base_link", "odom", tf2::TimePointZero, std::chrono::seconds(3));
+    tfBuff->lookupTransform(base_frame_, odom_frame_, tf2::TimePointZero, std::chrono::seconds(3));
   } catch (const tf2::TransformException &ex) {
     RCLCPP_WARN(node_->get_logger(), "%s", ex.what());
     rclcpp::sleep_for(std::chrono::seconds(1));
@@ -197,8 +206,8 @@ TrajectoryGenerator::TrajectoryGenerator(const std::shared_ptr<rclcpp::Node>& no
   node_->declare_parameter<double>("dwal_generator/alpha", 0.2);
   node_->declare_parameter<double>("dwal_generator/Kmax", 2.0);
   node_->declare_parameter<double>("dwal_generator/Hz", 5.0);
-  node_->declare_parameter<std::vector<double>>("dwal_clustering/levels", {});
-  node_->declare_parameter<std::string>("odometryTopic", "/odom");
+  node_->declare_parameter<std::vector<double>>("common/levels", {});
+  node_->declare_parameter<std::string>("dwal_generator/odometryTopic", "/odom");
 
   double acc_lim_x{0.5}, acc_lim_th{0.5};
   node_->get_parameter("dwal_generator/acc_lim_x",      acc_lim_x);
@@ -213,9 +222,10 @@ TrajectoryGenerator::TrajectoryGenerator(const std::shared_ptr<rclcpp::Node>& no
   node_->get_parameter("dwal_generator/alpha", alpha);
   node_->get_parameter("dwal_generator/Kmax",       kmax);
   node_->get_parameter("dwal_generator/Hz",         Hz);
-  node_->get_parameter("dwal_clustering/levels",    levels);
+  node_->get_parameter("common/levels",    levels);
 
-  node_->get_parameter("odometryTopic", odom_Topic);
+  node_->get_parameter("dwal_generator/odometryTopic", odom_Topic);
+  RCLCPP_INFO(node_->get_logger(), "Using odometry topic '%s'", odom_Topic.c_str());
 
   alims.setAccLimits(static_cast<float>(acc_lim_x), 0.0f, static_cast<float>(acc_lim_th));
 
@@ -254,7 +264,7 @@ TrajectoryGenerator::TrajectoryGenerator(const std::shared_ptr<rclcpp::Node>& no
   cluster.pose0.resize(3);
   cluster.levels = levels;
 
-  path_marker.header.frame_id = "odom";
+  path_marker.header.frame_id = odom_frame_;
   path_marker.header.stamp = node_->now();
   path_marker.ns = "dwal_planner";
   path_marker.id = 0;
@@ -290,7 +300,6 @@ int main(int argc, char **argv)
 
   TrajectoryGenerator generator(node);
 
-  std::cout << generator.odom_Topic << "\n";
   generator.sampledCl_publisher = node->create_publisher<dwal_planner::msg::SampledCluster>("sampled_paths", rclcpp::QoS(2));
   generator.sampledCl_markers_publisher = node->create_publisher<visualization_msgs::msg::MarkerArray>("sampled_pathMarkers", rclcpp::QoS(2));
   generator.odom_subscriber = node->create_subscription<nav_msgs::msg::Odometry>(
