@@ -61,7 +61,8 @@ public:
     std::string odom_frame;
     node_->declare_parameter<std::string>("common/odom_frame", "odom");
     node_->get_parameter("common/odom_frame", odom_frame);
-
+    RCLCPP_INFO(node_->get_logger(), "Using odometry frame '%s'", odom_frame.c_str());
+    
     // Wait until the generator sets a non-negative value
     marker_num = -1;
     while (rclcpp::ok() && marker_num < 0) {
