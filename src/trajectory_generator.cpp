@@ -114,9 +114,9 @@ TrajectoryGenerator::TrajectoryGenerator(const std::shared_ptr<rclcpp::Node>& no
   tfl = std::make_unique<tf2_ros::TransformListener>(*tfBuff);
 
   std::string occ_topic_default = "/occupancy_map_local";
-  node_->declare_parameter<std::string>("occ_topic", occ_topic_default);
+  node_->declare_parameter<std::string>("dwal_generator/occ_topic", occ_topic_default);
   std::string occ_topic = occ_topic_default;
-  node_->get_parameter("occ_topic", occ_topic);
+  node_->get_parameter("dwal_generator/occ_topic", occ_topic);
   RCLCPP_INFO(node_->get_logger(), "Using occupancy topic '%s'", occ_topic.c_str());
 
   node_->declare_parameter<std::vector<double>>("dwal_generator/footprint", {});
