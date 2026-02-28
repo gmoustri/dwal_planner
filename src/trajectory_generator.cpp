@@ -117,6 +117,7 @@ TrajectoryGenerator::TrajectoryGenerator(const std::shared_ptr<rclcpp::Node>& no
   node_->declare_parameter<std::string>("occ_topic", occ_topic_default);
   std::string occ_topic = occ_topic_default;
   node_->get_parameter("occ_topic", occ_topic);
+  RCLCPP_INFO(node_->get_logger(), "Using occupancy topic '%s'", occ_topic.c_str());
 
   node_->declare_parameter<std::vector<double>>("dwal_generator/footprint", {});
   std::vector<double> footprint_xy;
