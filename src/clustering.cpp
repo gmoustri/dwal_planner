@@ -59,10 +59,9 @@ public:
     node_->get_parameter("dwal_clustering/cluster_separation", cluster_separation);
 
     std::string odom_frame;
-    node_->declare_parameter<std::string>("common/odom_frame", "odom");
     node_->get_parameter("common/odom_frame", odom_frame);
     RCLCPP_INFO(node_->get_logger(), "Using odometry frame '%s'", odom_frame.c_str());
-    
+
     // Wait until the generator sets a non-negative value
     marker_num = -1;
     while (rclcpp::ok() && marker_num < 0) {
@@ -405,6 +404,7 @@ public:
     ros_node->declare_parameter<double>("dwal_clustering/min_cluster_span", 0.5);
     ros_node->declare_parameter<int>("dwal_clustering/cluster_separation", 5);
     ros_node->declare_parameter<int>("dwal_clustering/Marker_num", -1);
+    ros_node->declare_parameter<std::string>("common/odom_frame", "odom");
 
     ros_node->get_parameter("dwal_clustering/postfix", postfixes);
     ros_node->get_parameter("common/levels", levels);
