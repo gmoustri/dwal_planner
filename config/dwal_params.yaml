@@ -25,6 +25,7 @@
     "dwal_generator/base_frame": "base_link"
 
   #  footprint: [0.362, 0.308, 0.362, -0.308, -0.362, -0.308, -0.362, 0.308]
+    "dwal_clustering/subsample_step": 3
     "dwal_generator/footprint": [0.1]
     "dwal_generator/footprint_padding": 0.1
     "dwal_generator/acc_lim_x": 1.5

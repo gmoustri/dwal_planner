@@ -57,6 +57,7 @@ public:
 
     node_->get_parameter("dwal_clustering/min_cluster_span", min_cluster_span);
     node_->get_parameter("dwal_clustering/cluster_separation", cluster_separation);
+    node_->get_parameter("dwal_clustering/path_subsample", subsample_step);
 
     std::string odom_frame;
     node_->get_parameter("common/odom_frame", odom_frame);
@@ -301,7 +302,7 @@ public:
     //////--- end clustering -----------------------------------------------------------
 
     //populate cluster_group msg and path markers
-    int j;
+    //int j;
     for (std::vector<int> &clvec : cluster_vecs)
     {
       tmp_cluster.paths.clear(); //clear temp cluster
@@ -311,18 +312,24 @@ public:
       
       for (int &l : clvec)
       {
-        j = 0;
         if (*spin != 0)
         {
-          for (const dwal_planner::msg::Pose2D32 &p : msg->paths[static_cast<size_t>(l)].poses)
+          const auto & path = msg->paths[static_cast<size_t>(l)];
+          const int last = std::min(
+            static_cast<int>(path.poses.size()) - 1,
+            static_cast<int>(path.level_inds[static_cast<size_t>(level_index)]));
+
+          for (int j = 0; j <= last; j += subsample_step)
           {
-            p0.x = p.x;
-            p0.y = p.y;
+            p0.x = path.poses[static_cast<size_t>(j)].x;
+            p0.y = path.poses[static_cast<size_t>(j)].y;
             path_array_marker.markers[static_cast<size_t>(l)].points.push_back(p0);
-            
-            if ( j >= static_cast<int>(msg->paths[l].level_inds[level_index]) )
-              break;
-            j++;
+          }
+          if (last >= 0 && (last % subsample_step) != 0)
+          {
+            p0.x = path.poses[static_cast<size_t>(last)].x;
+            p0.y = path.poses[static_cast<size_t>(last)].y;
+            path_array_marker.markers[static_cast<size_t>(l)].points.push_back(p0);
           }
         }
         tmp_path.curvature = msg->paths[static_cast<size_t>(l)].curvature;
@@ -371,7 +378,7 @@ private:
   geometry_msgs::msg::Point p0;
   visualization_msgs::msg::Marker path_marker;
   visualization_msgs::msg::MarkerArray path_array_marker;
-
+  
   double Dphip{0.0}, min_cluster_span{0.5}, Rcl{0.0}, curv_mob{0.0}, phi0{0.0};
   std::vector<double> temp, prev_mean_phi, cur_mean_phi;
 
@@ -380,6 +387,7 @@ private:
   std::vector<unsigned int> prev_ids;
   std::vector<std::vector<double>> phi_distances;
   int marker_num{0}, cluster_separation{5}, cluster_num{0}, path_num{0}, prev_cluster_num{0}, Dind{0};
+  int subsample_step{3};
 
   dwal_planner::msg::PathCluster tmp_cluster;
   dwal_planner::msg::Path tmp_path;
@@ -405,6 +413,7 @@ public:
     ros_node->declare_parameter<int>("dwal_clustering/cluster_separation", 5);
     ros_node->declare_parameter<int>("dwal_clustering/Marker_num", -1);
     ros_node->declare_parameter<std::string>("common/odom_frame", "odom");
+    ros_node->declare_parameter<int>("dwal_clustering/subsample_step", 3);
 
     ros_node->get_parameter("dwal_clustering/postfix", postfixes);
     ros_node->get_parameter("common/levels", levels);
