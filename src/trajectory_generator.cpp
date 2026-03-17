@@ -311,18 +311,14 @@ int main(int argc, char **argv)
   node->get_parameter("dwal_generator/Hz", hz);
   rclcpp::Rate r(hz);
 
-  rclcpp::Time t0 = node->get_clock()->now();
-  rclcpp::Time tini =t0;
+  rclcpp::Time tini = node->get_clock()->now();
 
   while (rclcpp::ok())
   {
     rclcpp::spin_some(node);
     r.sleep();
-    if(node->get_clock()->now()-t0 > rclcpp::Duration(2,0))
-    {
-      t0 = node->get_clock()->now();
-      RCLCPP_INFO(node->get_logger(), "Spinning: T= %f passed", (t0-tini).seconds());
-    }
+    RCLCPP_INFO_THROTTLE(node->get_logger(),*node->get_clock(), 2000, 
+        "Spinning: T= %f passed", (node->get_clock()->now()-tini).seconds());
   }
 
   rclcpp::shutdown();
